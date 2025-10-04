@@ -6,6 +6,13 @@
 
   <title>VidShrink — Shrink Video Size Online (Free, Fast, No Upload)</title>
   <meta name="description" content="Shrink video file size online for free. Compress MP4/MOV right in your browser—fast, private, and no uploads. Perfect for iPhone videos, email, Instagram, and more.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Ownership / attribution -->
+  <meta name="author" content="Steven Tauriello">
+  <meta name="copyright" content="© Steven Tauriello">
+  <meta name="creator" content="Steven Tauriello">
+  <link rel="author" href="https://freedomcrate.co/">
 
   <!-- Canonical + social previews -->
   <link rel="canonical" href="https://www.vidshrink.com/">
@@ -13,21 +20,23 @@
   <meta property="og:description" content="Compress MP4/MOV in your browser. No uploads. No watermarks. Just smaller videos.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.vidshrink.com/">
+  <!-- Optional: add a real image and uncomment -->
+  <!-- <meta property="og:image" content="https://www.vidshrink.com/og.jpg"> -->
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- Basic theming (safe to keep even without a PWA) -->
+  <!-- Basic theming -->
   <meta name="theme-color" content="#1a365d">
 
-  <!-- Main stylesheet (kept separate so your existing file continues to work) -->
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="styles.css">
 
   <!-- Small inline polish that won’t fight your stylesheet -->
   <style>
-    :root { --brand: #3182ce; --brand-dark:#2b6cb0; --ink:#111; --muted:#6b7280; }
+    :root { --brand:#3182ce; --brand-dark:#2b6cb0; --ink:#111; --muted:#6b7280; }
     body { margin:0; color:var(--ink); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
     header.site { text-align:center; padding:2.5rem 1rem; color:#fff;
-      background:linear-gradient(135deg,#2b6cb0, #3182ce); border-bottom:3px solid #1a365d; }
-    header .lede { max-width:60ch; margin:0.5rem auto 0; opacity:.95 }
+      background:linear-gradient(135deg,#2b6cb0,#3182ce); border-bottom:3px solid #1a365d; }
+    header .lede { max-width:60ch; margin:.5rem auto 0; opacity:.95 }
     main.container { max-width:950px; margin:0 auto; padding:1.5rem; }
     .drop { border:2px dashed #c7d2fe; border-radius:12px; padding:2rem; background:#f8fafc; }
     .btn { border:0; border-radius:8px; padding:.75rem 1.1rem; font-weight:600; cursor:pointer; }
@@ -36,7 +45,7 @@
     .btn.ghost { background:#eef2f7; color:#111; }
     .row { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin:.75rem 0; }
     label { font-weight:600; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace; }
     .progress { background:#e5e7eb; border-radius:999px; padding:4px; }
     .progress .bar { height:10px; border-radius:999px; width:0; background:var(--brand); transition:width .2s linear; }
     .privacy { color:var(--muted); font-size:.95rem; }
@@ -47,7 +56,7 @@
     .skip-link:focus { left:1rem; top:1rem; width:auto; height:auto; padding:.5rem .75rem; background:#111; color:#fff; border-radius:6px; z-index:1000; }
   </style>
 
-  <!-- FAQ schema for SEO -->
+  <!-- FAQ schema (SEO) -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -57,6 +66,23 @@
       {"@type":"Question","name":"Is it safe and private?","acceptedAnswer":{"@type":"Answer","text":"Yes. Your video never leaves your device. Compression runs entirely in your browser using WebAssembly."}},
       {"@type":"Question","name":"Does it work on iPhone?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open vidshrink.com in Safari, add to Home Screen for an app-like experience, and compress MP4/MOV clips."}}
     ]
+  }
+  </script>
+
+  <!-- WebApplication + Person (extra discoverability/attribution) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "VidShrink",
+    "url": "https://www.vidshrink.com/",
+    "applicationCategory": "Multimedia",
+    "operatingSystem": "Web",
+    "creator": {
+      "@type": "Person",
+      "name": "Steven Tauriello",
+      "url": "https://freedomcrate.co/"
+    }
   }
   </script>
 </head>
@@ -130,17 +156,14 @@
   </main>
 
   <footer class="site">
-    <small>© <span id="year"></span> VidShrink. Also reachable via <strong>VideoShrink.net</strong>.</small>
+    <small>© <span id="year"></span> VidShrink • Built by Steven Tauriello. Also reachable via <strong>VideoShrink.net</strong>.</small>
   </footer>
 
-  <!-- Tiny helper: year + 'no-js' safety if needed -->
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 
-  <!-- App logic (unchanged) -->
   <script type="module" src="app.js"></script>
-
   <noscript>This tool needs JavaScript to run entirely on your device.</noscript>
 </body>
 </html>
