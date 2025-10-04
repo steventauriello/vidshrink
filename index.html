@@ -2,11 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>VidShrink — Shrink Video Size Online (Free, Fast, No Upload)</title>
-  <meta name="description" content="Shrink video file size online for free. Compress MP4/MOV right in your browser—fast, private, and no uploads. Perfect for iPhone videos, email, Instagram, and more." />
-  <link rel="canonical" href="https://www.vidshrink.com/" />
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="description" content="Shrink video file size online for free. Compress MP4/MOV right in your browser—fast, private, and no uploads. Perfect for iPhone videos, email, Instagram, and more.">
+
+  <!-- Canonical + social previews -->
+  <link rel="canonical" href="https://www.vidshrink.com/">
+  <meta property="og:title" content="VidShrink — Shrink Video Size Online">
+  <meta property="og:description" content="Compress MP4/MOV in your browser. No uploads. No watermarks. Just smaller videos.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.vidshrink.com/">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Basic theming (safe to keep even without a PWA) -->
+  <meta name="theme-color" content="#1a365d">
+
+  <!-- Main stylesheet (kept separate so your existing file continues to work) -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Small inline polish that won’t fight your stylesheet -->
+  <style>
+    :root { --brand: #3182ce; --brand-dark:#2b6cb0; --ink:#111; --muted:#6b7280; }
+    body { margin:0; color:var(--ink); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+    header.site { text-align:center; padding:2.5rem 1rem; color:#fff;
+      background:linear-gradient(135deg,#2b6cb0, #3182ce); border-bottom:3px solid #1a365d; }
+    header .lede { max-width:60ch; margin:0.5rem auto 0; opacity:.95 }
+    main.container { max-width:950px; margin:0 auto; padding:1.5rem; }
+    .drop { border:2px dashed #c7d2fe; border-radius:12px; padding:2rem; background:#f8fafc; }
+    .btn { border:0; border-radius:8px; padding:.75rem 1.1rem; font-weight:600; cursor:pointer; }
+    .btn.primary { background:var(--brand); color:#fff; }
+    .btn.primary:hover { background:var(--brand-dark); }
+    .btn.ghost { background:#eef2f7; color:#111; }
+    .row { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin:.75rem 0; }
+    label { font-weight:600; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .progress { background:#e5e7eb; border-radius:999px; padding:4px; }
+    .progress .bar { height:10px; border-radius:999px; width:0; background:var(--brand); transition:width .2s linear; }
+    .privacy { color:var(--muted); font-size:.95rem; }
+    .faq { margin:2rem 0; }
+    .faq details { background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:1rem 1.25rem; margin:.75rem 0; }
+    footer.site { text-align:center; padding:2rem 1rem; background:#f1f5f9; color:#374151; }
+    .skip-link { position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus { left:1rem; top:1rem; width:auto; height:auto; padding:.5rem .75rem; background:#111; color:#fff; border-radius:6px; z-index:1000; }
+  </style>
 
   <!-- FAQ schema for SEO -->
   <script type="application/ld+json">
@@ -22,26 +61,30 @@
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
   <header class="site">
     <h1>Shrink your video size — fast, private, free.</h1>
     <p class="lede">Compress MP4/MOV in your browser. No uploads. No watermarks. Just smaller videos.</p>
   </header>
 
-  <main class="container">
-    <section class="tool">
-      <div id="drop" class="drop">
+  <main id="main" class="container" role="main">
+    <section class="tool" aria-label="Video compressor">
+      <!-- Drop zone -->
+      <div id="drop" class="drop" aria-live="polite">
         <input id="file" type="file" accept="video/*" hidden>
         <div class="drop-inner">
           <p><strong>Drag &amp; drop</strong> a video here, or</p>
-          <button id="pick" class="btn">Choose Video</button>
+          <button id="pick" class="btn" type="button" aria-controls="file">Choose Video</button>
           <p class="hint">MP4/MOV supported. Works on iPhone and desktop.</p>
         </div>
       </div>
 
-      <div id="options" class="options hidden">
+      <!-- Options appear after a file is selected -->
+      <div id="options" class="options hidden" aria-hidden="true">
         <div class="row">
           <label for="preset">Preset</label>
-          <select id="preset">
+          <select id="preset" name="preset">
             <option value="balanced">Balanced (1080p • good quality • ~40–70% smaller)</option>
             <option value="losslessish">Lossless-ish (same resolution • lower bitrate)</option>
             <option value="smaller">Smaller (720p • smaller file • still looks great on mobile)</option>
@@ -50,30 +93,39 @@
 
         <div class="row">
           <label>Estimated output size</label>
-          <div id="est" class="mono">—</div>
+          <div id="est" class="mono" aria-live="polite">—</div>
         </div>
 
         <div class="row">
-          <button id="start" class="btn primary">Compress Video</button>
-          <button id="reset" class="btn ghost">Reset</button>
+          <button id="start" class="btn primary" type="button">Compress Video</button>
+          <button id="reset" class="btn ghost" type="button">Reset</button>
         </div>
 
-        <div id="progWrap" class="progress hidden">
+        <div id="progWrap" class="progress hidden" aria-hidden="true" aria-label="Progress">
           <div id="progBar" class="bar"></div>
-          <div id="progText" class="mono">Preparing…</div>
+          <div id="progText" class="mono" style="margin-top:.25rem" aria-live="polite">Preparing…</div>
         </div>
 
-        <div id="result" class="result hidden"></div>
+        <div id="result" class="result hidden" aria-live="polite"></div>
       </div>
 
       <p class="privacy">Privacy: Your video never leaves your device. Compression runs locally using WebAssembly.</p>
     </section>
 
-    <section class="faq">
+    <section class="faq" aria-label="Common questions">
       <h2>Common questions</h2>
-      <details><summary>What settings should I use?</summary><p><strong>Balanced</strong> is great for most uploads (email, forms, social). Use <strong>Smaller</strong> for the tiniest files. Use <strong>Lossless-ish</strong> when you need the original resolution with mild reduction.</p></details>
-      <details><summary>Will it work with 4K videos?</summary><p>Yes, but browser compression can be slow for long 4K clips. For best results, start with short clips or use the 720p preset.</p></details>
-      <details><summary>Why no upload?</summary><p>It’s faster and private. Everything runs in your browser.</p></details>
+      <details>
+        <summary>What settings should I use?</summary>
+        <p><strong>Balanced</strong> is great for most uploads (email, forms, social). Use <strong>Smaller</strong> for the tiniest files. Use <strong>Lossless-ish</strong> when you need the original resolution with mild reduction.</p>
+      </details>
+      <details>
+        <summary>Will it work with 4K videos?</summary>
+        <p>Yes, but browser compression can be slow for long 4K clips. For best results, start with short clips or use the 720p preset.</p>
+      </details>
+      <details>
+        <summary>Why no upload?</summary>
+        <p>It’s faster and private. Everything runs in your browser.</p>
+      </details>
     </section>
   </main>
 
@@ -81,6 +133,14 @@
     <small>© <span id="year"></span> VidShrink. Also reachable via <strong>VideoShrink.net</strong>.</small>
   </footer>
 
+  <!-- Tiny helper: year + 'no-js' safety if needed -->
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+  <!-- App logic (unchanged) -->
   <script type="module" src="app.js"></script>
+
+  <noscript>This tool needs JavaScript to run entirely on your device.</noscript>
 </body>
 </html>
