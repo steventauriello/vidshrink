@@ -1,0 +1,78 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: #f8f9fa;
+  color: #111;
+  text-align: center;
+}
+
+header.site, footer.site {
+  padding: 2rem 1rem;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+}
+
+.container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+
+.btn {
+  padding: .6rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #0078ff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn.ghost {
+  background: #ccc;
+  color: #333;
+}
+
+.btn.primary:hover {
+  background: #005ed6;
+}
+
+.drop {
+  border: 2px dashed #bbb;
+  border-radius: 12px;
+  padding: 3rem 1rem;
+  margin-bottom: 1rem;
+  transition: background .2s;
+}
+
+.drop:hover {
+  background: #f0f7ff;
+}
+
+.hidden { display: none; }
+
+.row {
+  margin: 1rem 0;
+}
+
+.mono {
+  font-family: monospace;
+}
+
+.progress {
+  background: #e5e5e5;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 12px;
+  margin-top: .5rem;
+}
+
+.progress .bar {
+  background: #0078ff;
+  height: 100%;
+  width: 0%;
+  transition: width .3s ease;
+}
