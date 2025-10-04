@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VidShrink — Shrink Video Size Online (Free, Fast, No Upload)</title>
+  <meta name="description" content="Shrink video file size online for free. Compress MP4/MOV right in your browser—fast, private, and no uploads. Perfect for iPhone videos, email, Instagram, and more." />
+  <link rel="canonical" href="https://www.vidshrink.com/" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- FAQ schema for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {"@type":"Question","name":"How do I shrink my video file size?","acceptedAnswer":{"@type":"Answer","text":"Drop your video into VidShrink, pick a preset (Balanced is best), and download a smaller MP4. All processing is on-device—nothing uploads."}},
+      {"@type":"Question","name":"Is it safe and private?","acceptedAnswer":{"@type":"Answer","text":"Yes. Your video never leaves your device. Compression runs entirely in your browser using WebAssembly."}},
+      {"@type":"Question","name":"Does it work on iPhone?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open vidshrink.com in Safari, add to Home Screen for an app-like experience, and compress MP4/MOV clips."}}
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="site">
+    <h1>Shrink your video size — fast, private, free.</h1>
+    <p class="lede">Compress MP4/MOV in your browser. No uploads. No watermarks. Just smaller videos.</p>
+  </header>
+
+  <main class="container">
+    <section class="tool">
+      <div id="drop" class="drop">
+        <input id="file" type="file" accept="video/*" hidden>
+        <div class="drop-inner">
+          <p><strong>Drag &amp; drop</strong> a video here, or</p>
+          <button id="pick" class="btn">Choose Video</button>
+          <p class="hint">MP4/MOV supported. Works on iPhone and desktop.</p>
+        </div>
+      </div>
+
+      <div id="options" class="options hidden">
+        <div class="row">
+          <label for="preset">Preset</label>
+          <select id="preset">
+            <option value="balanced">Balanced (1080p • good quality • ~40–70% smaller)</option>
+            <option value="losslessish">Lossless-ish (same resolution • lower bitrate)</option>
+            <option value="smaller">Smaller (720p • smaller file • still looks great on mobile)</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label>Estimated output size</label>
+          <div id="est" class="mono">—</div>
+        </div>
+
+        <div class="row">
+          <button id="start" class="btn primary">Compress Video</button>
+          <button id="reset" class="btn ghost">Reset</button>
+        </div>
+
+        <div id="progWrap" class="progress hidden">
+          <div id="progBar" class="bar"></div>
+          <div id="progText" class="mono">Preparing…</div>
+        </div>
+
+        <div id="result" class="result hidden"></div>
+      </div>
+
+      <p class="privacy">Privacy: Your video never leaves your device. Compression runs locally using WebAssembly.</p>
+    </section>
+
+    <section class="faq">
+      <h2>Common questions</h2>
+      <details><summary>What settings should I use?</summary><p><strong>Balanced</strong> is great for most uploads (email, forms, social). Use <strong>Smaller</strong> for the tiniest files. Use <strong>Lossless-ish</strong> when you need the original resolution with mild reduction.</p></details>
+      <details><summary>Will it work with 4K videos?</summary><p>Yes, but browser compression can be slow for long 4K clips. For best results, start with short clips or use the 720p preset.</p></details>
+      <details><summary>Why no upload?</summary><p>It’s faster and private. Everything runs in your browser.</p></details>
+    </section>
+  </main>
+
+  <footer class="site">
+    <small>© <span id="year"></span> VidShrink. Also reachable via <strong>VideoShrink.net</strong>.</small>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
