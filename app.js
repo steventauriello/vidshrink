@@ -139,34 +139,49 @@ function renderResult(outBlob, filename, mime) {
 // -----------------------------------------------------
 //  FFmpeg loader (videos) — single definition
 // -----------------------------------------------------
-let ffmpeg;       // instance
+let ffmpeg;
 let ffmpegReady = false;
 
 async function ensureFFmpeg() {
   if (ffmpegReady) return;
 
-  // Wrapper must be added in index.html:
-  // <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  // 1) Wrapper must be present (loaded in index.html BEFORE app.js)
   if (!window.FFmpeg) {
-    throw new Error('FFmpeg wrapper not found on window. Check the <script> in index.html.');
+    throw new Error('FFmpeg wrapper script not found. Check the <script> tag order in index.html.');
   }
-
   const { createFFmpeg, fetchFile } = window.FFmpeg;
 
+  // 2) Use the same versioned core as the wrapper (set in index.html)
   const corePath =
     window.__FFMPEG_CORE_PATH ||
-    "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js";
+    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js';
 
-  ffmpeg = createFFmpeg({
-    log: false,
-    corePath
-  });
+  // 3) Quick sanity check that CSP/CDN lets us reach the core
+  try {
+    const head = await fetch(corePath, { method: 'HEAD', mode: 'cors' });
+    if (!head.ok) {
+      throw new Error(`HTTP ${head.status}`);
+    }
+  } catch (e) {
+    throw new Error(
+      `Can't fetch ffmpeg-core.js (${corePath}). Likely a CSP/worker/CDN block. ` +
+      `Make sure your CSP includes: worker-src blob: https://cdn.jsdelivr.net; ` +
+      `child-src blob: https://cdn.jsdelivr.net; connect-src https://cdn.jsdelivr.net; ` +
+      `and script-src includes 'wasm-unsafe-eval'.`
+    );
+  }
+
+  // 4) Create + load
+  ffmpeg = createFFmpeg({ log: true, corePath });
+
+  // Surface FFmpeg log lines to the console so we see what's wrong
+  try { ffmpeg.setLogger?.(({ type, message }) => console.log(`[ffmpeg:${type}]`, message)); } catch {}
 
   try {
     await ffmpeg.load();
   } catch (e) {
     console.error('FFmpeg load error:', e);
-    throw new Error('Failed to load FFmpeg core (network/ad blocker?).');
+    throw new Error('Failed to load FFmpeg core (ad blocker/CSP/worker issue?).');
   }
 
   // expose helper for use in compressVideo
