@@ -422,7 +422,7 @@ resetBtn.addEventListener('click', () => location.reload());
     ffmpeg = createFFmpeg({
       log: false,
       // Keep core version in sync with the wrapper above.
-      corePath: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js'
+      corePath: 'https://unpkg.com/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js'
     });
 
     try {
