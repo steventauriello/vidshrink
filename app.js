@@ -397,3 +397,92 @@ startBtn.addEventListener('click', async () => {
 
 // Reset
 resetBtn.addEventListener('click', () => location.reload());
+/* ===========================
+   VidShrink – FFmpeg patch
+   Paste at the very bottom of app.js
+   =========================== */
+(() => {
+  if (window.__VS_PATCH_APPLIED__) return;
+  window.__VS_PATCH_APPLIED__ = true;
+
+  // We reuse the globals declared earlier:
+  // let ffmpeg; let ffmpegReady; progBar, progText, etc.
+
+  // --- Override: ensureFFmpeg (version-locked, robust errors)
+  ensureFFmpeg = async function ensureFFmpegPatched() {
+    if (ffmpegReady) return;
+
+    // Wrapper must be added in index.html:
+    // <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
+    if (!window.FFmpeg) {
+      throw new Error('FFmpeg wrapper not found on window. Check the <script> in index.html.');
+    }
+
+    const { createFFmpeg, fetchFile } = window.FFmpeg;
+
+    ffmpeg = createFFmpeg({
+      log: false,
+      // Keep core version in sync with the wrapper above.
+      corePath: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js'
+    });
+
+    try {
+      await ffmpeg.load();
+    } catch (e) {
+      console.error('FFmpeg load error:', e);
+      throw new Error('Failed to load FFmpeg core (network/ad-blocker?).');
+    }
+
+    // expose helper for use in compressVideo
+    ensureFFmpeg.fetchFile = fetchFile;
+    ffmpegReady = true;
+  };
+
+  // --- Override: compressVideo (uses Uint8Array directly, better errors)
+  compressVideo = async function compressVideoPatched(file, preset) {
+    await ensureFFmpeg();
+    const { fetchFile } = ensureFFmpeg;
+
+    const inName  = 'input.' + (file.name.split('.').pop() || 'mp4');
+    const outName = 'output.mp4';
+
+    try {
+      ffmpeg.FS('writeFile', inName, await fetchFile(file));
+    } catch (e) {
+      console.error('FFmpeg writeFile error:', e);
+      throw new Error('Could not write input to FFmpeg FS.');
+    }
+
+    const args = ['-i', inName, ...presetToFFmpegArgs(preset), outName];
+
+    // Progress (FFmpeg → your bar)
+    ffmpeg.setProgress(({ ratio }) => {
+      const pct = Math.min(99, Math.floor((ratio || 0) * 100));
+      progBar.style.width = pct + '%';
+      progText.textContent = `Compressing… ${pct}%`;
+    });
+
+    try {
+      await ffmpeg.run(...args);
+    } catch (e) {
+      console.error('FFmpeg run error:', e);
+      throw new Error('FFmpeg failed while encoding.');
+    }
+
+    let data;
+    try {
+      data = ffmpeg.FS('readFile', outName);   // Uint8Array
+    } catch (e) {
+      console.error('FFmpeg readFile error:', e);
+      throw new Error('Could not read output from FFmpeg FS.');
+    } finally {
+      try { ffmpeg.FS('unlink', inName); } catch {}
+      try { ffmpeg.FS('unlink', outName); } catch {}
+    }
+
+    // IMPORTANT: construct Blob from the Uint8Array, not data.buffer (fixes iOS saves).
+    return new Blob([data], { type: 'video/mp4' });
+  };
+
+  console.log('✅ VidShrink FFmpeg patch applied');
+})();
