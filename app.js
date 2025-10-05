@@ -395,3 +395,115 @@ startBtn?.addEventListener('click', async () => {
 
 // Reset
 resetBtn?.addEventListener('click', () => location.reload());
+/* ===========================
+   VidShrink – FFmpeg video patch (iOS/Safari safe)
+   Paste at the very bottom of app.js
+   =========================== */
+(() => {
+  if (window.__VS_VIDEO_PATCH__) return;
+  window.__VS_VIDEO_PATCH__ = true;
+
+  // 1) Make sure we load the exact core the page points at
+  const CORE_FALLBACK = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js";
+
+  // Override ensureFFmpeg to honor the global core path and improve errors
+  const originalEnsure = typeof ensureFFmpeg === 'function' ? ensureFFmpeg : null;
+  ensureFFmpeg = async function ensureFFmpegPatched() {
+    // If caller already loaded, we're done
+    if (typeof ffmpegReady !== 'undefined' && ffmpegReady) return;
+
+    if (!window.FFmpeg) {
+      throw new Error("FFmpeg wrapper not found. Make sure the wrapper <script> is before app.js.");
+    }
+
+    const { createFFmpeg, fetchFile } = window.FFmpeg;
+    const corePath = (window.__FFMPEG_CORE_PATH || CORE_FALLBACK);
+
+    ffmpeg = createFFmpeg({
+      log: false,
+      corePath
+    });
+
+    try {
+      await ffmpeg.load();
+    } catch (e) {
+      console.error('FFmpeg load error:', e);
+      throw new Error('Failed to load FFmpeg core. (CSP/ad-block/network)');
+    }
+
+    ensureFFmpeg.fetchFile = fetchFile;
+    ffmpegReady = true;
+  };
+
+  // 2) Force H.264 + yuv420p (iOS-friendly) and keep your other options
+  const originalPresetToArgs = typeof presetToFFmpegArgs === 'function' ? presetToFFmpegArgs : null;
+  presetToFFmpegArgs = function presetToFFmpegArgsPatched(preset, inputW = null, inputH = null) {
+    // start from your logic if present
+    let base = originalPresetToArgs ? originalPresetToArgs(preset, inputW, inputH) : [
+      '-c:v','libx264','-crf','28','-preset','veryfast','-movflags','+faststart','-c:a','aac','-b:a','128k'
+    ];
+
+    // Ensure pixel format is yuv420p for broad playback (especially iOS)
+    // and avoid duplicates if user code already added it.
+    if (!base.includes('-pix_fmt')) {
+      base = ['-pix_fmt','yuv420p', ...base];
+    }
+    return base;
+  };
+
+  // 3) Build the Blob from the Uint8Array (NOT data.buffer) — this fixes iOS
+  compressVideo = async function compressVideoPatched(file, preset) {
+    await ensureFFmpeg();
+    const { fetchFile } = ensureFFmpeg;
+
+    const inName  = 'input.' + (file.name.split('.').pop() || 'mp4');
+    const outName = 'output.mp4';
+
+    // Write input
+    try {
+      ffmpeg.FS('writeFile', inName, await fetchFile(file));
+    } catch (e) {
+      console.error('FFmpeg writeFile error:', e);
+      throw new Error('Could not write input to FFmpeg FS.');
+    }
+
+    // Progress
+    ffmpeg.setProgress(({ ratio }) => {
+      const pct = Math.min(99, Math.floor((ratio || 0) * 100));
+      if (typeof progBar !== 'undefined') progBar.style.width = pct + '%';
+      if (typeof progText !== 'undefined') progText.textContent = `Compressing… ${pct}%`;
+    });
+
+    // Run
+    const args = ['-i', inName, ...presetToFFmpegArgs(preset), outName];
+    try {
+      await ffmpeg.run(...args);
+    } catch (e) {
+      console.error('FFmpeg run error:', e);
+      throw new Error('FFmpeg failed while encoding this file.');
+    }
+
+    // Read output
+    let data;
+    try {
+      data = ffmpeg.FS('readFile', outName); // Uint8Array
+    } catch (e) {
+      console.error('FFmpeg readFile error:', e);
+      throw new Error('Could not read output from FFmpeg FS.');
+    } finally {
+      try { ffmpeg.FS('unlink', inName); } catch {}
+      try { ffmpeg.FS('unlink', outName); } catch {}
+    }
+
+    // Build Blob from Uint8Array (CRITICAL for iOS)
+    const blob = new Blob([data], { type: 'video/mp4' });
+
+    // Quick sanity check
+    if (!blob.size) {
+      throw new Error('Encoding produced an empty file (check input format or preset).');
+    }
+    return blob;
+  };
+
+  console.log('✅ VidShrink video patch active');
+})();
