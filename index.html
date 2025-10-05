@@ -27,7 +27,7 @@
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Fallback for browsers that don't load external CSS -->
+  <!-- Minimal inline baseline styles (kept from your version) -->
   <style>
     body {
       margin: 0;
@@ -37,7 +37,6 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
-
     header.site {
       text-align: center;
       padding: 2.5rem 1rem;
@@ -46,27 +45,9 @@
       border-bottom: 2px solid rgba(79, 140, 255, 0.3);
       box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
-
-    header h1 {
-      font-size: clamp(28px, 4vw, 46px);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.3em;
-    }
-
-    header .lede {
-      max-width: 60ch;
-      margin: 0.5rem auto 0;
-      color: #a8b0cf;
-      font-size: 1.1rem;
-    }
-
-    main.container {
-      max-width: 950px;
-      margin: 0 auto;
-      padding: 1.5rem;
-    }
-
+    header h1 { font-size: clamp(28px, 4vw, 46px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.3em; }
+    header .lede { max-width: 60ch; margin: 0.5rem auto 0; color: #a8b0cf; font-size: 1.1rem; }
+    main.container { max-width: 950px; margin: 0 auto; padding: 1.5rem; }
     .drop {
       border: 2px dashed rgba(79, 140, 255, 0.4);
       border-radius: 12px;
@@ -77,47 +58,12 @@
       text-align: center;
       transition: all 0.3s ease;
     }
-
-    .drop:hover {
-      border-color: #4f8cff;
-      transform: translateY(-2px);
-      box-shadow: 0 0 0 6px rgba(79, 140, 255, 0.15), 0 12px 28px rgba(0, 0, 0, 0.45);
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 10px;
-      padding: 0.75rem 1.25rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.25s ease;
-    }
-
-    .btn.primary {
-      background: linear-gradient(135deg, #4f8cff, #8f7fff);
-      color: #fff;
-      box-shadow: 0 6px 16px rgba(79, 140, 255, 0.25);
-    }
-
-    .btn.primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(79, 140, 255, 0.35);
-    }
-
-    .btn.ghost {
-      background: transparent;
-      border: 1px solid rgba(168, 176, 207, 0.3);
-      color: #a8b0cf;
-    }
-
-    .mode {
-      display: flex;
-      justify-content: center;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-    }
-
+    .drop:hover { border-color: #4f8cff; transform: translateY(-2px); box-shadow: 0 0 0 6px rgba(79, 140, 255, 0.15), 0 12px 28px rgba(0, 0, 0, 0.45); }
+    .btn { border: 0; border-radius: 10px; padding: 0.75rem 1.25rem; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.25s ease; }
+    .btn.primary { background: linear-gradient(135deg, #4f8cff, #8f7fff); color: #fff; box-shadow: 0 6px 16px rgba(79, 140, 255, 0.25); }
+    .btn.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79, 140, 255, 0.35); }
+    .btn.ghost { background: transparent; border: 1px solid rgba(168, 176, 207, 0.3); color: #a8b0cf; }
+    .mode { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; }
     .chip {
       background: rgba(79, 140, 255, 0.08);
       color: #a8b0cf;
@@ -128,29 +74,12 @@
       font-weight: 600;
       transition: all 0.2s ease;
     }
-
-    .chip.selected {
-      background: linear-gradient(135deg, #4f8cff, #8f7fff);
-      color: white;
-      border-color: transparent;
-      box-shadow: 0 0 10px rgba(79, 140, 255, 0.3);
-    }
-
-    .privacy {
-      color: #a8b0cf;
-      font-size: 0.95rem;
-      text-align: center;
-      margin-top: 1.25rem;
-    }
-
+    .chip.selected { background: linear-gradient(135deg, #4f8cff, #8f7fff); color: white; border-color: transparent; box-shadow: 0 0 10px rgba(79, 140, 255, 0.3); }
+    .privacy { color: #a8b0cf; font-size: 0.95rem; text-align: center; margin-top: 1.25rem; }
     footer.site {
-      text-align: center;
-      padding: 2.5rem 1rem;
-      color: #a8b0cf;
-      background: rgba(15, 21, 48, 0.9);
-      border-top: 1px solid rgba(79, 140, 255, 0.15);
-      margin-top: 3rem;
-      font-size: 0.9rem;
+      text-align: center; padding: 2.5rem 1rem; color: #a8b0cf;
+      background: rgba(15, 21, 48, 0.9); border-top: 1px solid rgba(79, 140, 255, 0.15);
+      margin-top: 3rem; font-size: 0.9rem;
     }
   </style>
 
@@ -193,31 +122,31 @@
         </div>
       </div>
 
+      <!-- Options / estimates / progress -->
       <div id="options" class="options hidden" aria-hidden="true">
         <div class="row">
           <label for="preset">Here are your options:</label>
           <select id="preset" name="preset">
-  <option value="same">Same resolution (best quality • ~25% smaller)</option>
-<option value="small">Small (good quality • ~45–55% smaller)</option>
-<option value="smallest">Smallest (720p • ~75% smaller)</option>
-</select>
+            <option value="same">Same resolution (best quality • ~25% smaller)</option>
+            <option value="small">Small (good quality • ~45–55% smaller)</option>
+            <option value="smallest">Smallest (720p • ~75% smaller)</option>
+          </select>
         </div>
 
-        <!-- Sizes -->
-<div class="row">
-  <label>Original size</label>
-  <div id="orig" class="mono">—</div>
-</div>
+        <div class="row">
+          <label>Original size</label>
+          <div id="orig" class="mono">—</div>
+        </div>
 
-<div class="row">
-  <label>Estimated output size</label>
-  <div id="est" class="mono">—</div>
-</div>
+        <div class="row">
+          <label>Estimated output size</label>
+          <div id="est" class="mono">—</div>
+        </div>
 
-<div class="row hidden" id="savingsRow">
-  <label>Savings</label>
-  <div id="save" class="mono">—</div>
-</div>
+        <div class="row hidden" id="savingsRow">
+          <label>Savings</label>
+          <div id="save" class="mono">—</div>
+        </div>
 
         <div class="row">
           <button id="start" class="btn primary" type="button">Compress Video</button>
@@ -228,36 +157,27 @@
           <div id="progBar" class="bar"></div>
           <div id="progText" class="mono" style="margin-top:.25rem" aria-live="polite">Preparing…</div>
         </div>
+      </div> <!-- /#options -->
 
-        <div id="result" class="result hidden" aria-live="polite"></div>
-      </div>
+      <!-- Results Panel (buttons get injected by app.js) -->
+      <section id="result" class="result panel hidden" aria-live="polite"></section>
 
-      <p>Privacy: Your files never leave your device. Compression runs locally using WebAssembly.</p>
-<p><strong>Zero!! Absolutely zero data is taken.</strong></p>
+      <p class="privacy">
+        Privacy: Your files never leave your device. Compression runs locally using WebAssembly.<br>
+        <strong>Zero!! Absolutely zero data is taken.</strong>
+      </p>
+
     </section>
   </main>
-<section class="manifesto">
-  <h2>Let's Be Real.</h2>
-  <p>
-    Shrinking videos and photos shouldn’t be a guessing game, a paywall, or a pop-up circus.
-  </p>
-  <p>
-    We built <strong>VidShrink</strong> for creators, small businesses, and families — 
-    for anyone who just wants something that works.
-  </p>
-  <p>
-    No accounts. No uploads. No gimmicks. 
-    Drop it in, shrink it, and move on with your day.
-  </p>
-  <p>
-    This was built by the people, for the people — because we know how frustrating
-    tech can be when it should just *work*.
-  </p>
-  <p class="signoff">
-    I just hope this tool makes your day a little easier, a little less stressful.<br>
-    — <strong>Steven Tauriello</strong> 🇺🇸
-  </p>
-</section>
+
+  <section class="manifesto">
+    <h2>Let's Be Real.</h2>
+    <p>Shrinking videos and photos shouldn’t be a guessing game, a paywall, or a pop-up circus.</p>
+    <p>We built <strong>VidShrink</strong> for creators, small businesses, and families — for anyone who just wants something that works.</p>
+    <p>No accounts. No uploads. No gimmicks. Drop it in, shrink it, and move on with your day.</p>
+    <p>This was built by the people, for the people — because we know how frustrating tech can be when it should just <em>work</em>.</p>
+    <p class="signoff">I just hope this tool makes your day a little easier, a little less stressful.<br>— <strong>Steven Tauriello</strong> 🇺🇸</p>
+  </section>
 
   <footer class="site">
     <small>© <span id="year"></span> VidShrink • Built by Steven Tauriello. Also reachable via <strong>VideoShrink.net</strong>.</small>
