@@ -321,3 +321,27 @@ header .lede {
 }
 #orig, #est, #save { font-variant-numeric: tabular-nums; }
 #save { color: #18c29c; }              /* green for “Savings” */
+/* Ensure the dropdown fits within the card */
+.options select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  background-color: rgba(15, 21, 48, 0.9);
+  color: #eaf0ff;
+  border: 1px solid rgba(79, 140, 255, 0.3);
+}
+
+/* Prevent layout overflow */
+.options {
+  overflow: hidden;
+}
+
+@media (max-width: 720px) {
+  .options select {
+    font-size: 0.95rem;
+  }
+}
