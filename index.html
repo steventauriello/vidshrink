@@ -24,6 +24,30 @@
 
   <meta name="theme-color" content="#0b1020">
 
+  <!-- Security / CSP (tuned for ffmpeg.wasm) -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    img-src 'self' data: blob:;
+    style-src 'self' 'unsafe-inline';
+    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    connect-src 'self' https://cdn.jsdelivr.net;
+    worker-src 'self' blob:;
+    media-src 'self' blob:;
+    base-uri 'none';
+    frame-ancestors 'none';
+    upgrade-insecure-requests
+  ">
+
+  <!-- Favicon (ensure /favicon.ico exists on your server) -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">
+
+  <!-- Performance hint for CDN -->
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="styles.css">
 
@@ -184,18 +208,30 @@
   </footer>
 
   <script>
-  // Footer year
-  document.getElementById('year').textContent = new Date().getFullYear();
-</script>
+    // Footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 
-<!-- FFmpeg UMD (wrapper) — unpkg version fixes MIME error -->
-<script
- src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"
-  referrerpolicy="no-referrer">
-</script>
-<!-- Your app code -->
-<script type="module" src="app.js"></script>
+  <!-- FFmpeg UMD (wrapper) — use jsDelivr to avoid CORP blocks -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer">
+  </script>
 
-<noscript>This tool needs JavaScript to run entirely on your device.</noscript>
+  <!-- Configure core path + shim global so app.js can find FFmpeg -->
+  <script>
+    // Point wasm core to the same CDN/version.
+    window.__FFMPEG_CORE_PATH = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js";
+    // Some app code expects window.FFmpeg; make sure it's there.
+    if (typeof window.FFmpeg === "undefined" && typeof FFmpeg !== "undefined") {
+      window.FFmpeg = FFmpeg;
+    }
+  </script>
+
+  <!-- Your app code (expects window.FFmpeg and window.__FFMPEG_CORE_PATH) -->
+  <script type="module" src="app.js"></script>
+
+  <noscript>This tool needs JavaScript to run entirely on your device.</noscript>
 </body>
 </html>
