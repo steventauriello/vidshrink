@@ -256,3 +256,22 @@ header .lede {
   font-weight: 400;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* subtle depth */
 }
+/* Mode toggle */
+.mode { display:flex; gap:8px; margin: 0 0 12px; }
+.chip {
+  appearance:none;
+  border:1px solid color-mix(in srgb, var(--muted) 40%, transparent);
+  background: color-mix(in srgb, var(--surface-strong) 85%, transparent);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor:pointer;
+  font-weight:600;
+}
+.chip:hover { border-color: var(--brand); }
+.chip.selected {
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color:#fff;
+  border-color: transparent;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 28%, transparent);
+}
