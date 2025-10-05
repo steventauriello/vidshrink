@@ -138,7 +138,8 @@
 
       <!-- Drop zone -->
       <div id="drop" class="drop" aria-live="polite">
-        <input id="file" type="file" accept="video/*" hidden>
+        <!-- NEW: visually hidden (NOT display:none) so iOS allows programmatic click -->
+<input id="file" type="file" accept="video/*" class="sr-only-file" />
         <div class="drop-inner">
           <p><strong>Drag &amp; drop</strong> a file here, or</p>
           <button id="pick" class="btn primary" type="button" aria-controls="file">Choose Video</button>
