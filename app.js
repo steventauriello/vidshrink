@@ -1,3 +1,7 @@
+// =======================================
+// VidShrink — main client script
+// =======================================
+
 // === DOM refs ===
 const fileInput  = document.getElementById('file');
 const pickBtn    = document.getElementById('pick');
@@ -23,32 +27,13 @@ const year = document.getElementById('year');
 if (year) year.textContent = new Date().getFullYear();
 
 // === State ===
-let videoFile = null;
-let estBytes  = null;
-let currentMode = 'video'; // default
-
-// === FFmpeg (for real video compression) ===
-import { createFFmpeg, fetchFile } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js';
-
-const ffmpeg = createFFmpeg({
-  log: false,
-  corePath: 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/ffmpeg-core.js'
-});
-
-async function ensureFFmpeg() {
-  if (!ffmpeg.isLoaded()) {
-    // reflect loader progress in your UI
-    ffmpeg.setProgress(({ ratio }) => {
-      const pct = Math.max(1, Math.floor((ratio || 0) * 100));
-      progBar.style.width = pct + '%';
-      progText.textContent = `Preparing encoder… ${pct}%`;
-    });
-    await ffmpeg.load();
-  }
-}
+let videoFile   = null;      // holds the picked file (image or video)
+let estBytes    = null;      // estimated output bytes (from preset)
+let currentMode = 'video';   // 'video' | 'photo'
 
 // === Helpers ===
 const MB = 1024 * 1024;
+
 function formatBytes(bytes) {
   if (!Number.isFinite(bytes)) return '—';
   if (bytes < MB) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -57,7 +42,12 @@ function formatBytes(bytes) {
 }
 
 function estimateOutputBytes(inputBytes, preset) {
-  const ratios = { same: 0.75, small: 0.55, smallest: 0.25 };
+  // top = biggest output, middle = medium, bottom = smallest
+  const ratios = {
+    same:      0.75, // ~25% smaller
+    small:     0.55, // ~45–55% smaller
+    smallest:  0.25  // ~75% smaller
+  };
   const r = ratios[preset] ?? ratios.small;
   return Math.max(0.9 * MB, Math.round(inputBytes * r));
 }
@@ -78,50 +68,13 @@ function makeOutName(inputName, mode = 'video') {
   return `${stem}-shrink${ext}`;
 }
 
-// ---------- NEW: real photo compression (canvas → JPEG) ----------
-function targetPhotoSettings(preset, w, h) {
-  // quality + scale rules
-  if (preset === 'same')   return { q: 0.92, scale: 1 };
-  if (preset === 'small')  return { q: 0.8,  scale: 0.75 };
-  // "smallest": cap long edge ~1280px
-  const long = Math.max(w, h);
-  const scale = long > 1280 ? 1280 / long : 1;
-  return { q: 0.68, scale };
-}
-
-async function compressPhotoBlob(file, preset) {
-  const url = URL.createObjectURL(file);
-  try {
-    const img = await new Promise((res, rej) => {
-      const i = new Image();
-      i.onload = () => res(i);
-      i.onerror = rej;
-      i.src = url;
-    });
-    const { q, scale } = targetPhotoSettings(preset, img.width, img.height);
-    const w = Math.max(1, Math.round(img.width  * scale));
-    const h = Math.max(1, Math.round(img.height * scale));
-
-    const canvas = document.createElement('canvas');
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d', { alpha: false });
-    ctx.drawImage(img, 0, 0, w, h);
-
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', q));
-    // If toBlob returns null (rare), fall back to original file
-    return blob || file;
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
-// -----------------------------------------------------------------
-
-// Render result actions (Download + Save to Photos when available)
+// Inject result UI + wire buttons
 function renderResult(outBlob, filename, mime) {
   const url = URL.createObjectURL(outBlob);
-  const canShareFiles = !!(navigator.canShare && navigator.canShare({
-    files: [new File([outBlob], filename, { type: mime })]
-  }));
+  const canShareFiles = !!(
+    navigator.canShare &&
+    navigator.canShare({ files: [new File([outBlob], filename, { type: mime })] })
+  );
 
   const shareBtnHTML = canShareFiles
     ? `<button id="shareBtn" class="btn primary" type="button" style="margin-right:.5rem">Save to Photos</button>`
@@ -147,16 +100,160 @@ function renderResult(outBlob, filename, mime) {
     sb.addEventListener('click', async () => {
       try {
         await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
-      } catch {/* cancel */}
+      } catch {
+        /* user cancelled */
+      }
     });
   }
 }
 
-// === File picking & DnD ===
+// -----------------------------------------------------
+//  FFmpeg loader (for videos)
+// -----------------------------------------------------
+let ffmpeg;       // instance
+let ffmpegReady = false;
+
+async function ensureFFmpeg() {
+  if (ffmpegReady) return;
+
+  // Load FFmpeg (UMD build)
+  if (!window.FFmpeg) {
+    await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.9/dist/ffmpeg.min.js');
+  }
+  const { createFFmpeg, fetchFile } = window.FFmpeg;
+  // Create & load core
+  ffmpeg = createFFmpeg({
+    log: false,
+    corePath: 'https://unpkg.com/@ffmpeg/core@0.12.9/dist/ffmpeg-core.js'
+  });
+  await ffmpeg.load();
+
+  // expose helper for use in compressVideo
+  ensureFFmpeg.fetchFile = fetchFile;
+
+  ffmpegReady = true;
+}
+
+// -----------------------------------------------------
+//  Your provided blocks: preset → args & compressVideo
+// -----------------------------------------------------
+
+// Preset → ffmpeg options
+function presetToFFmpegArgs(preset, inputW = null, inputH = null) {
+  // Defaults that look good on phones and social
+  // You can tweak CRF (lower = better quality, larger file)
+  let vf = [];
+  let crf = 23;         // best quality (same)
+  let maxW = null;      // width cap used in "smallest"
+
+  if (preset === 'same') {
+    crf = 23; // ~25% smaller
+  } else if (preset === 'small') {
+    crf = 28; // ~45–55% smaller
+    maxW = 1080;        // scale down if larger
+  } else if (preset === 'smallest') {
+    crf = 30; // ~75% smaller
+    maxW = 720;
+  }
+
+  if (maxW && inputW && inputH && inputW > maxW) {
+    // keep aspect ratio, width multiple of 2 for H.264
+    vf = ['-vf', `scale='min(${maxW},iw)':'-2'`];
+  }
+
+  return [
+    '-c:v', 'libx264',
+    '-crf', String(crf),
+    '-preset', 'veryfast',
+    ...vf,
+    '-movflags', '+faststart',
+    '-c:a', 'aac',
+    '-b:a', '128k'
+  ];
+}
+
+async function compressVideo(file, preset) {
+  await ensureFFmpeg();
+
+  const { fetchFile } = ensureFFmpeg;
+
+  // Write input to FFmpeg FS
+  const inName  = 'input.' + (file.name.split('.').pop() || 'mp4');
+  const outName = 'output.mp4';
+  ffmpeg.FS('writeFile', inName, await fetchFile(file));
+
+  // Use args based on preset
+  const args = ['-i', inName, ...presetToFFmpegArgs(preset), outName];
+
+  // Show encoding progress in the existing bar
+  ffmpeg.setProgress(({ ratio }) => {
+    const pct = Math.min(99, Math.floor((ratio || 0) * 100));
+    progBar.style.width = pct + '%';
+    progText.textContent = `Compressing… ${pct}%`;
+  });
+
+  await ffmpeg.run(...args);
+
+  // Read output back
+  const data = ffmpeg.FS('readFile', outName);
+  const blob = new Blob([data.buffer], { type: 'video/mp4' });
+
+  // Clean up FS
+  try { ffmpeg.FS('unlink', inName); } catch {}
+  try { ffmpeg.FS('unlink', outName); } catch {}
+
+  return blob;
+}
+
+// -----------------------------------------------------
+//  Image compression (canvas → JPEG)
+// -----------------------------------------------------
+async function compressImage(file, preset) {
+  const map = {
+    same:      { maxW: null, quality: 0.9 },
+    small:     { maxW: 1080, quality: 0.78 },
+    smallest:  { maxW: 720,  quality: 0.66 }
+  };
+  const { maxW, quality } = map[preset] ?? map.small;
+
+  // Load image
+  const blobURL = URL.createObjectURL(file);
+  const img = new Image();
+  img.decoding = 'async';
+  img.src = blobURL;
+  await img.decode();
+
+  // Compute size
+  let w = img.naturalWidth;
+  let h = img.naturalHeight;
+  if (maxW && w > maxW) {
+    const scale = maxW / w;
+    w = Math.round(maxW);
+    h = Math.round(h * scale);
+  }
+
+  // Draw
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  URL.revokeObjectURL(blobURL);
+
+  // Export JPEG
+  const outBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+  return outBlob || file; // fallback
+}
+
+// -----------------------------------------------------
+//  File picking & DnD
+// -----------------------------------------------------
 pickBtn.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
+drop.addEventListener('dragover', e => {
+  e.preventDefault();
+  drop.classList.add('dragover');
+});
 drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
 drop.addEventListener('drop', e => {
   e.preventDefault();
@@ -176,7 +273,9 @@ function handleFile(file) {
   updateEstimate();
 }
 
-// === Mode Switching ===
+// -----------------------------------------------------
+//  Mode Switching
+// -----------------------------------------------------
 modeVideo.addEventListener('click', () => {
   currentMode = 'video';
   modeVideo.classList.add('selected');
@@ -195,85 +294,97 @@ modePhoto.addEventListener('click', () => {
   startBtn.textContent = 'Compress Photo';
 });
 
-// === Preset change ===
+// Preset change
 presetSel.addEventListener('change', updateEstimate);
 
-// === “Compression” simulator + real photo path ===
-startBtn.addEventListener('click', () => {
+// -----------------------------------------------------
+//  Start compression
+// -----------------------------------------------------
+startBtn.addEventListener('click', async () => {
   if (!videoFile) return;
 
+  // reset previous result
   result.classList.add('hidden');
   result.innerHTML = '';
 
+  // show progress UI
   progWrap.classList.remove('hidden');
-  let width = 0;
+  progBar.style.width = '0%';
+  progText.textContent = 'Preparing…';
 
-  const timer = setInterval(async () => {
-    width += 5;
-    progBar.style.width = width + '%';
-    progText.textContent = `Compressing… ${width}%`;
+  // Estimate & savings UI updates occur after we get the output
+  try {
+    // Do the actual work
+    let outBlob, mime;
+    const preset = presetSel.value;
 
-    if (width >= 100) {
-      clearInterval(timer);
+    if (currentMode === 'photo') {
+      mime = 'image/jpeg';
+      // quick fake progress for nicer UX while we work
+      for (let w = 0; w <= 25; w += 5) {
+        await new Promise(r => setTimeout(r, 25));
+        progBar.style.width = `${w}%`;
+        progText.textContent = `Compressing… ${w}%`;
+      }
+      outBlob = await compressImage(videoFile, preset);
+      progBar.style.width = '100%';
       progText.textContent = 'Done!';
-
-      let outBlob, mime, outName;
-
-      if (currentMode === 'photo') {
-        // REAL image compression
-        mime = 'image/jpeg';
-        outBlob = await compressPhotoBlob(videoFile, presetSel.value);
-        outName = makeOutName(videoFile.name, 'photo');
-      } else {
-        // Simulated video output (placeholder until real encoder)
-        mime = 'video/mp4';
-        const outBytes = estBytes ?? videoFile.size;
-        outBlob = new Blob([new Uint8Array(Math.max(outBytes, 1024))], { type: mime });
-        outName = makeOutName(videoFile.name, 'video');
-      }
-
-      // Compute actual savings from produced blob
-      const savedBytes = Math.max(0, videoFile.size - outBlob.size);
-      const savedPct = videoFile.size > 0
-        ? Math.round((savedBytes / videoFile.size) * 100)
-        : 0;
-
-      saveRow?.classList.remove('hidden');
-      saveEl.textContent =
-        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBlob.size)})`;
-
-      // Show result actions
-      renderResult(outBlob, outName, mime);
-
-      // Auto-open Share Sheet (fallback to download)
-      try {
-        const fileForShare = new File([outBlob], outName, { type: mime });
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [fileForShare] })) {
-          await navigator.share({
-            files: [fileForShare],
-            title: 'Your compressed file is ready',
-            text: 'Choose where to save or share your new file.'
-          });
-        } else {
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(outBlob);
-          link.download = outName;
-          document.body.appendChild(link);
-          link.click();
-          setTimeout(() => {
-            URL.revokeObjectURL(link.href);
-            link.remove();
-          }, 2000);
-        }
-      } catch (err) {
-        console.error('Share/download error:', err);
-      }
-
-      const pcts = result.querySelector('p.mono');
-      if (pcts) pcts.textContent =
-        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBlob.size)})`;
+    } else {
+      mime = 'video/mp4';
+      outBlob = await compressVideo(videoFile, preset); // FFmpeg handles progress bar updates
+      progBar.style.width = '100%';
+      progText.textContent = 'Done!';
     }
-  }, 200);
+
+    // Savings line
+    const outBytes = estBytes ?? outBlob.size ?? videoFile.size;
+    const savedBytes = Math.max(0, videoFile.size - outBytes);
+    const savedPct = videoFile.size > 0
+      ? Math.round((savedBytes / videoFile.size) * 100)
+      : 0;
+
+    saveRow?.classList.remove('hidden');
+    saveEl.textContent =
+      `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
+
+    // Result UI + auto open share
+    const outName = makeOutName(videoFile.name, currentMode);
+    renderResult(outBlob, outName, mime);
+
+    // Auto-open share sheet or fallback download
+    try {
+      const f = new File([outBlob], outName, { type: mime });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [f] })) {
+        await navigator.share({
+          files: [f],
+          title: 'Your compressed file is ready',
+          text: 'Choose where to save or share your new file.'
+        });
+      } else {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(outBlob);
+        link.download = outName;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(link.href);
+          link.remove();
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Share/download error:', err);
+    }
+
+    // Put % saved into the first mono <p> in the result panel
+    const pcts = result.querySelector('p.mono');
+    if (pcts) {
+      pcts.textContent = `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
+    }
+  } catch (err) {
+    console.error(err);
+    progText.textContent = 'Something went wrong.';
+  }
 });
 
+// Reset
 resetBtn.addEventListener('click', () => location.reload());
