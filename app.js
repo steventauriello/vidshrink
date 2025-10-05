@@ -128,7 +128,7 @@ const { createFFmpeg, fetchFile } = window.FFmpeg;
 ffmpeg = createFFmpeg({
   log: false,
   // IMPORTANT: core version & CDN must match the wrapper above
-  corePath: 'https://unpkg.com/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js'
+corePath: 'https://unpkg.com/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js'
 });
   try {
     await ffmpeg.load();
