@@ -379,8 +379,9 @@ startBtn?.addEventListener('click', async () => {
         }, 2000);
       }
     } catch (err) {
-      console.error('Share/download error:', err);
-    }
+  console.error(err);
+  progText.textContent = (err && err.message) ? String(err.message) : 'Something went wrong.';
+}
 
     // Put % saved into the first mono <p> in the result panel
     const pcts = result?.querySelector('p.mono');
