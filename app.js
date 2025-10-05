@@ -118,19 +118,18 @@ async function ensureFFmpeg() {
   if (ffmpegReady) return;
 
   // We rely on the wrapper script tag you load in index.html:
-  // <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
-  if (!window.FFmpeg) {
-    throw new Error('FFmpeg wrapper not found on window. Check the <script> tag in index.html.');
-  }
+// <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
+if (!window.FFmpeg) {
+  throw new Error('FFmpeg wrapper not found on window. Check the <script> tag in index.html.');
+}
 
-  const { createFFmpeg, fetchFile } = window.FFmpeg;
+const { createFFmpeg, fetchFile } = window.FFmpeg;
 
-  ffmpeg = createFFmpeg({
-    log: false,
-    // IMPORTANT: core version & CDN must match the wrapper above
-corePath: 'https://unpkg.com/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js'
-  });
-
+ffmpeg = createFFmpeg({
+  log: false,
+  // IMPORTANT: core version & CDN must match the wrapper above
+  corePath: 'https://unpkg.com/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js'
+});
   try {
     await ffmpeg.load();
   } catch (e) {
