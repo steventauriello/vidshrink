@@ -47,12 +47,58 @@ function estimateOutputBytes(inputBytes, preset) {
   const r = ratios[preset] ?? ratios.small; // default to the middle option
   return Math.max(0.9 * MB, Math.round(inputBytes * r));
 }
+
 function updateEstimate() {
   if (!videoFile) return;
   estBytes = estimateOutputBytes(videoFile.size, presetSel.value);
   estEl.textContent = '≈ ' + formatBytes(estBytes);
   saveRow?.classList.add('hidden');
   saveEl.textContent = '—';
+}
+
+// Output filename helper
+function makeOutName(inputName, mode = 'video') {
+  const dot = inputName.lastIndexOf('.');
+  const stem = dot > -1 ? inputName.slice(0, dot) : inputName;
+  const ext  = (mode === 'photo') ? '.jpg' : '.mp4';
+  return `${stem}-shrink${ext}`;
+}
+
+// Render result actions (Download + Save to Photos when available)
+function renderResult(outBlob, filename, mime) {
+  const url = URL.createObjectURL(outBlob);
+
+  const shareSupported = !!(navigator.canShare && navigator.canShare({ files: [outBlob] }));
+  const shareBtn = shareSupported
+    ? `<button id="shareBtn" class="btn primary" type="button" style="margin-right:.5rem">Save to Photos</button>`
+    : '';
+
+  result.classList.remove('hidden');
+  result.innerHTML = `
+    <p>✅ Compression complete.</p>
+    <p class="mono" style="margin-bottom:.5rem"></p>
+    <div style="display:flex; flex-wrap:wrap; gap:.5rem; align-items:center">
+      ${shareBtn}
+      <a id="downloadLink" class="btn" href="${url}" download="${filename}">Download</a>
+      <span class="mono" style="margin-left:.25rem; opacity:.85">${filename}</span>
+    </div>
+    <p class="mono" style="margin-top:.5rem">Tip: On iPhone/Android, “Save to Photos” opens the Share sheet so you can save directly into your library.</p>
+  `;
+
+  // Wire buttons
+  const dl = document.getElementById('downloadLink');
+  const sb = document.getElementById('shareBtn');
+
+  if (sb) {
+    sb.addEventListener('click', async () => {
+      try {
+        await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
+      } catch (_) {
+        // user cancelled or share not available — no-op
+      }
+    });
+  }
+  dl.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 3000));
 }
 
 // === File picking & DnD ===
@@ -128,11 +174,17 @@ startBtn.addEventListener('click', () => {
       saveEl.textContent =
         `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
 
-      result.classList.remove('hidden');
-      result.innerHTML = `
-        <p>✅ Compression complete.</p>
-        <p class="mono">${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})</p>
-      `;
+      // --- Demo output Blob (replace with real compressed Blob when ready) ---
+      const mime = (currentMode === 'photo') ? 'image/jpeg' : 'video/mp4';
+      const outBlob = new Blob([new Uint8Array(Math.max(outBytes, 1024))], { type: mime });
+      const outName = makeOutName(videoFile.name, currentMode);
+
+      // Actions: Download + Save to Photos (when supported)
+      renderResult(outBlob, outName, mime);
+
+      // Put % saved line into the summary area (first <p> inside result)
+      const pcts = result.querySelector('p.mono');
+      if (pcts) pcts.textContent = `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
     }
   }, 200);
 });
