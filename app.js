@@ -108,7 +108,8 @@ function renderResult(outBlob, filename, mime) {
 }
 
 // -----------------------------------------------------
-//  FFmpeg loader (for videos)
+// -----------------------------------------------------
+//  FFmpeg loader (for videos) - version-locked
 // -----------------------------------------------------
 let ffmpeg;       // instance
 let ffmpegReady = false;
@@ -116,21 +117,29 @@ let ffmpegReady = false;
 async function ensureFFmpeg() {
   if (ffmpegReady) return;
 
-  // Load FFmpeg (UMD build)
+  // We rely on the wrapper script tag you load in index.html:
+  // <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
   if (!window.FFmpeg) {
-    await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.9/dist/ffmpeg.min.js');
+    throw new Error('FFmpeg wrapper not found on window. Check the <script> tag in index.html.');
   }
+
   const { createFFmpeg, fetchFile } = window.FFmpeg;
-  // Create & load core
+
   ffmpeg = createFFmpeg({
     log: false,
-    corePath: 'https://unpkg.com/@ffmpeg/core@0.12.9/dist/ffmpeg-core.js'
+    // IMPORTANT: core version & CDN must match the wrapper above
+    corePath: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js'
   });
-  await ffmpeg.load();
+
+  try {
+    await ffmpeg.load();
+  } catch (e) {
+    console.error('FFmpeg load error:', e);
+    throw new Error('Failed to load FFmpeg core (network/ad blocker?).');
+  }
 
   // expose helper for use in compressVideo
   ensureFFmpeg.fetchFile = fetchFile;
-
   ffmpegReady = true;
 }
 
