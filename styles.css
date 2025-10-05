@@ -364,3 +364,14 @@ footer.site{
 #file {
   display: none !important;
 }
+/* Visually hide but keep focusability and layout presence */
+.sr-only-file {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);           /* legacy clip */
+  clip-path: inset(50%);         /* modern */
+  white-space: nowrap;
+}
