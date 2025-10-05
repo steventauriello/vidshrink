@@ -468,58 +468,49 @@ resetBtn?.addEventListener('click', () => location.reload());
   };
 
   // 3) Build the Blob from the Uint8Array (NOT data.buffer) — this fixes iOS
-  compressVideo = async function compressVideoPatched(file, preset) {
-    await ensureFFmpeg();
-    const { fetchFile } = ensureFFmpeg;
+async function compressVideo(file, preset) {
+  await ensureFFmpeg();
+  const { fetchFile } = ensureFFmpeg;
 
-    const inName  = 'input.' + (file.name.split('.').pop() || 'mp4');
-    const outName = 'output.mp4';
+  const inName  = 'input.' + (file.name.split('.').pop() || 'mp4');
+  const outName = 'output.mp4';
 
-    // Write input
-    try {
-      ffmpeg.FS('writeFile', inName, await fetchFile(file));
-    } catch (e) {
-      console.error('FFmpeg writeFile error:', e);
-      throw new Error('Could not write input to FFmpeg FS.');
-    }
+  try {
+    ffmpeg.FS('writeFile', inName, await fetchFile(file));
+  } catch (e) {
+    console.error('FFmpeg writeFile error:', e);
+    throw new Error('Could not write input to FFmpeg FS.');
+  }
 
-    // Progress
-    ffmpeg.setProgress(({ ratio }) => {
-      const pct = Math.min(99, Math.floor((ratio || 0) * 100));
-      if (typeof progBar !== 'undefined') progBar.style.width = pct + '%';
-      if (typeof progText !== 'undefined') progText.textContent = `Compressing… ${pct}%`;
-    });
+  ffmpeg.setProgress(({ ratio }) => {
+    const pct = Math.min(99, Math.floor((ratio || 0) * 100));
+    if (typeof progBar !== 'undefined') progBar.style.width = pct + '%';
+    if (typeof progText !== 'undefined') progText.textContent = `Compressing… ${pct}%`;
+  });
 
-    // Run
-    const args = ['-i', inName, ...presetToFFmpegArgs(preset), outName];
-    try {
-      await ffmpeg.run(...args);
-    } catch (e) {
-      console.error('FFmpeg run error:', e);
-      throw new Error('FFmpeg failed while encoding this file.');
-    }
+  const args = ['-i', inName, ...presetToFFmpegArgs(preset), outName];
+  try {
+    await ffmpeg.run(...args);
+  } catch (e) {
+    console.error('FFmpeg run error:', e);
+    throw new Error('FFmpeg failed while encoding this file.');
+  }
 
-    // Read output
-    let data;
-    try {
-      data = ffmpeg.FS('readFile', outName); // Uint8Array
-    } catch (e) {
-      console.error('FFmpeg readFile error:', e);
-      throw new Error('Could not read output from FFmpeg FS.');
-    } finally {
-      try { ffmpeg.FS('unlink', inName); } catch {}
-      try { ffmpeg.FS('unlink', outName); } catch {}
-    }
+  let data;
+  try {
+    data = ffmpeg.FS('readFile', outName);
+  } catch (e) {
+    console.error('FFmpeg readFile error:', e);
+    throw new Error('Could not read output from FFmpeg FS.');
+  } finally {
+    try { ffmpeg.FS('unlink', inName); } catch {}
+    try { ffmpeg.FS('unlink', outName); } catch {}
+  }
 
-    // Build Blob from Uint8Array (CRITICAL for iOS)
-    const blob = new Blob([data], { type: 'video/mp4' });
-
-    // Quick sanity check
-    if (!blob.size) {
-      throw new Error('Encoding produced an empty file (check input format or preset).');
-    }
-    return blob;
-  };
+  const blob = new Blob([data], { type: 'video/mp4' });
+  if (!blob.size) throw new Error('Encoding produced an empty file (check input format or preset).');
+  return blob;
+}
 
   console.log('✅ VidShrink video patch active');
 })();
