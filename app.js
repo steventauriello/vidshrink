@@ -38,11 +38,7 @@ function formatBytes(bytes) {
 
 function estimateOutputBytes(inputBytes, preset) {
   // top = biggest output, middle = medium, bottom = smallest
-  const ratios = {
-    same:      0.75, // ~25% smaller
-    small:     0.55, // ~45–55% smaller
-    smallest:  0.25  // ~75% smaller
-  };
+  const ratios = { same: 0.75, small: 0.55, smallest: 0.25 };
   const r = ratios[preset] ?? ratios.small;
   return Math.max(0.9 * MB, Math.round(inputBytes * r));
 }
@@ -66,7 +62,9 @@ function makeOutName(inputName, mode = 'video') {
 // Render result actions (Download + Save to Photos when available)
 function renderResult(outBlob, filename, mime) {
   const url = URL.createObjectURL(outBlob);
-  const canShareFiles = !!(navigator.canShare && navigator.canShare({ files: [new File([outBlob], filename, { type: mime })] }));
+  const canShareFiles = !!(navigator.canShare && navigator.canShare({
+    files: [new File([outBlob], filename, { type: mime })]
+  }));
 
   const shareBtnHTML = canShareFiles
     ? `<button id="shareBtn" class="btn primary" type="button" style="margin-right:.5rem">Save to Photos</button>`
@@ -93,9 +91,7 @@ function renderResult(outBlob, filename, mime) {
     sb.addEventListener('click', async () => {
       try {
         await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
-      } catch {
-        // user cancelled / no-op
-      }
+      } catch { /* user cancelled */ }
     });
   }
 }
@@ -104,10 +100,7 @@ function renderResult(outBlob, filename, mime) {
 pickBtn.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-drop.addEventListener('dragover', e => {
-  e.preventDefault();
-  drop.classList.add('dragover');
-});
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
 drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
 drop.addEventListener('drop', e => {
   e.preventDefault();
@@ -159,6 +152,7 @@ startBtn.addEventListener('click', () => {
 
   progWrap.classList.remove('hidden');
   let width = 0;
+
   const timer = setInterval(async () => {
     width += 5;
     progBar.style.width = width + '%';
@@ -168,6 +162,7 @@ startBtn.addEventListener('click', () => {
       clearInterval(timer);
       progText.textContent = 'Done!';
 
+      // === Final Output and Share Sheet Logic (single copy!) ===
       const outBytes = estBytes ?? videoFile.size;
       const savedBytes = Math.max(0, videoFile.size - outBytes);
       const savedPct = videoFile.size > 0
@@ -178,20 +173,20 @@ startBtn.addEventListener('click', () => {
       saveEl.textContent =
         `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
 
-      // --- DEMO output Blob (replace with real compressed Blob later) ---
+      // Simulated compressed Blob (swap in real encoder output later)
       const mime = (currentMode === 'photo') ? 'image/jpeg' : 'video/mp4';
       const outBlob = new Blob([new Uint8Array(Math.max(outBytes, 1024))], { type: mime });
       const outName = makeOutName(videoFile.name, currentMode);
 
-      // Show buttons
+      // Show result UI
       renderResult(outBlob, outName, mime);
 
       // Auto-open Share Sheet (fallback to download)
       try {
-        const f = new File([outBlob], outName, { type: mime });
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [f] })) {
+        const fileForShare = new File([outBlob], outName, { type: mime });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [fileForShare] })) {
           await navigator.share({
-            files: [f],
+            files: [fileForShare],
             title: 'Your compressed file is ready',
             text: 'Choose where to save or share your new file.'
           });
@@ -207,15 +202,13 @@ startBtn.addEventListener('click', () => {
           }, 2000);
         }
       } catch (err) {
-        // non-fatal; user can still click the visible buttons
         console.error('Share/download error:', err);
       }
 
-      // Put % saved line into the summary area (first mono <p> inside result)
+      // Fill the summary line under “Compression complete.”
       const pcts = result.querySelector('p.mono');
-      if (pcts) {
-        pcts.textContent = `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
-      }
+      if (pcts) pcts.textContent =
+        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
     }
   }, 200);
 });
