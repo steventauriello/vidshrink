@@ -184,10 +184,16 @@
   </footer>
 
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
-  <script type="module" src="app.js"></script>
-  <noscript>This tool needs JavaScript to run entirely on your device.</noscript>
+  // Footer year
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+<!-- FFmpeg UMD (wrapper) — keep version in sync with app.js corePath -->
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
+
+<!-- Your app code -->
+<script type="module" src="app.js"></script>
+
+<noscript>This tool needs JavaScript to run entirely on your device.</noscript>
 </body>
 </html>
