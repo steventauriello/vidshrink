@@ -275,3 +275,47 @@ header .lede {
   border-color: transparent;
   box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 28%, transparent);
 }
+.manifesto {
+  text-align: center;
+  background: radial-gradient(900px 400px at center, rgba(79,140,255,0.08), transparent 70%);
+  color: #a8b0cf;
+  max-width: 800px;
+  margin: 5rem auto 3rem;
+  padding: 2.8rem 1.8rem;
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(79,140,255,0.15);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+  animation: fadeInUp 1.2s ease-out;
+}
+
+.manifesto h2 {
+  color: #4f8cff;
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  margin-bottom: 0.8rem;
+  letter-spacing: -0.015em;
+}
+
+.manifesto p {
+  line-height: 1.65;
+  font-size: 1.05rem;
+  margin: 1rem 0;
+  color: #c3c9e6;
+}
+
+.manifesto strong {
+  color: #4f8cff;
+}
+
+.manifesto .signoff {
+  font-style: italic;
+  color: #8f98c9;
+  margin-top: 1.8rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
