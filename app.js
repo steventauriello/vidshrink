@@ -36,15 +36,17 @@ function formatBytes(bytes) {
   return (val >= 100 ? val.toFixed(0) : val.toFixed(1)) + ' MB';
 }
 
+// Show “Same / Small / Smallest” in the right order:
+//  - same      ≈ 25% smaller (largest file)
+//  - small     ≈ 45–55% smaller
+//  - smallest  ≈ 75% smaller (smallest file)
 function estimateOutputBytes(inputBytes, preset) {
-  // Corrected to ensure top = largest file, middle = medium, bottom = smallest
   const ratios = {
     same:      0.75, // ~25% smaller (best quality)
     small:     0.55, // ~45–55% smaller (good quality)
     smallest:  0.25  // ~75% smaller (720p, smallest)
   };
-
-  const r = ratios[preset] ?? ratios.small; // default to the middle option
+  const r = ratios[preset] ?? ratios.small; // default to middle option
   return Math.max(0.9 * MB, Math.round(inputBytes * r));
 }
 
@@ -56,7 +58,7 @@ function updateEstimate() {
   saveEl.textContent = '—';
 }
 
-// Output filename helper
+// Output filename helper (kept same behavior; only ensures .jpg for photo mode)
 function makeOutName(inputName, mode = 'video') {
   const dot = inputName.lastIndexOf('.');
   const stem = dot > -1 ? inputName.slice(0, dot) : inputName;
@@ -64,7 +66,7 @@ function makeOutName(inputName, mode = 'video') {
   return `${stem}-shrink${ext}`;
 }
 
-// Render result actions (Download + Save to Photos when available)
+// Render result actions (Download + optional "Save to Photos" button)
 function renderResult(outBlob, filename, mime) {
   const url = URL.createObjectURL(outBlob);
 
@@ -85,7 +87,6 @@ function renderResult(outBlob, filename, mime) {
     <p class="mono" style="margin-top:.5rem">Tip: On iPhone/Android, “Save to Photos” opens the Share sheet so you can save directly into your library.</p>
   `;
 
-  // Wire buttons
   const dl = document.getElementById('downloadLink');
   const sb = document.getElementById('shareBtn');
 
@@ -93,24 +94,22 @@ function renderResult(outBlob, filename, mime) {
     sb.addEventListener('click', async () => {
       try {
         await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
-      } catch (_) {
-        // user cancelled or share not available — no-op
-      }
+      } catch (_) { /* user canceled or not available */ }
     });
   }
   dl.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 3000));
 }
 
 // === File picking & DnD ===
-pickBtn.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+pickBtn?.addEventListener('click', () => fileInput?.click());
+fileInput?.addEventListener('change', e => handleFile(e.target.files[0]));
 
-drop.addEventListener('dragover', e => {
+drop?.addEventListener('dragover', e => {
   e.preventDefault();
   drop.classList.add('dragover');
 });
-drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
-drop.addEventListener('drop', e => {
+drop?.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+drop?.addEventListener('drop', e => {
   e.preventDefault();
   drop.classList.remove('dragover');
   handleFile(e.dataTransfer.files[0]);
@@ -128,30 +127,30 @@ function handleFile(file) {
   updateEstimate();
 }
 
-// === Mode Switching ===
-modeVideo.addEventListener('click', () => {
+// === Mode Switching (FIX: ensure Photo button reliably switches accept & labels) ===
+modeVideo?.addEventListener('click', () => {
   currentMode = 'video';
   modeVideo.classList.add('selected');
   modePhoto.classList.remove('selected');
-  fileInput.accept = 'video/*';
+  if (fileInput) fileInput.accept = 'video/*,image/*'; // allow both sources; iOS returns actual chosen
   pickBtn.textContent = 'Choose Video';
   startBtn.textContent = 'Compress Video';
 });
 
-modePhoto.addEventListener('click', () => {
+modePhoto?.addEventListener('click', () => {
   currentMode = 'photo';
   modePhoto.classList.add('selected');
   modeVideo.classList.remove('selected');
-  fileInput.accept = 'image/*';
+  if (fileInput) fileInput.accept = 'image/*';
   pickBtn.textContent = 'Choose Photo';
   startBtn.textContent = 'Compress Photo';
 });
 
 // === Preset change ===
-presetSel.addEventListener('change', updateEstimate);
+presetSel?.addEventListener('change', updateEstimate);
 
 // === “Compression” simulator ===
-startBtn.addEventListener('click', () => {
+startBtn?.addEventListener('click', () => {
   if (!videoFile) return;
 
   progWrap.classList.remove('hidden');
@@ -181,38 +180,37 @@ startBtn.addEventListener('click', () => {
 
       // Actions: Download + Save to Photos (when supported)
       renderResult(outBlob, outName, mime);
-      // === Auto-open Share Sheet or Fallback Download ===
-try {
-  const mime = videoFile.type || "application/octet-stream";
-  const compressedBlob = new Blob(["compressed data"], { type: mime });
-  const compressedFile = new File(
-    [compressedBlob],
-    "compressed-" + videoFile.name,
-    { type: mime }
-  );
 
-  if (navigator.share && navigator.canShare && navigator.canShare({ files: [compressedFile] })) {
-    await navigator.share({
-      files: [compressedFile],
-      title: "Your compressed file is ready",
-      text: "Choose where to save or share your new file."
-    });
-    console.log("✅ Share sheet opened successfully");
-  } else {
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(compressedBlob);
-    link.download = "compressed-" + videoFile.name;
-    link.click();
-    console.log("⬇️ Fallback: file downloaded instead");
-  }
-} catch (err) {
-  console.error("Share or download failed:", err);
-}
+      // === Auto-open Share Sheet or Fallback Download (no await at top level) ===
+      (async () => {
+        try {
+          const fileForShare = new File([outBlob], outName, { type: mime });
+
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [fileForShare] })) {
+            await navigator.share({
+              files: [fileForShare],
+              title: 'Your compressed file is ready',
+              text: 'Choose where to save or share your new file.'
+            });
+            console.log('✅ Share sheet opened successfully');
+          } else {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(outBlob);
+            link.download = outName;
+            link.click();
+            console.log('⬇️ Fallback: file downloaded instead');
+          }
+        } catch (err) {
+          console.error('Share or download failed:', err);
+        }
+      })();
+
       // Put % saved line into the summary area (first <p> inside result)
       const pcts = result.querySelector('p.mono');
-      if (pcts) pcts.textContent = `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
+      if (pcts) pcts.textContent =
+        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
     }
   }, 200);
 });
 
-resetBtn.addEventListener('click', () => location.reload());
+resetBtn?.addEventListener('click', () => location.reload());
