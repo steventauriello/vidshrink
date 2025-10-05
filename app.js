@@ -23,13 +23,47 @@ const saveEl     = document.getElementById('save');
 const modeVideo  = document.getElementById('modeVideo');
 const modePhoto  = document.getElementById('modePhoto');
 
-const year = document.getElementById('year');
-if (year) year.textContent = new Date().getFullYear();
+const yearEl = document.getElementById('year');
+if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+// --- iOS-safe picker button ---
+pickBtn?.addEventListener('click', () => {
+  if (!fileInput) return;
+
+  // allow re-selecting the same file
+  fileInput.value = '';
+
+  try {
+    if (typeof fileInput.showPicker === 'function') {
+      fileInput.showPicker();
+      return;
+    }
+  } catch {
+    // some browsers throw if showPicker is blocked; fall through
+  }
+  fileInput.click();
+});
+
+// --- Mode setup: keep accept + labels in sync ---
+let currentMode = 'video';
+function setMode(mode) {
+  currentMode = mode;
+  const isVideo = mode === 'video';
+
+  modeVideo?.classList.toggle('selected', isVideo);
+  modePhoto?.classList.toggle('selected', !isVideo);
+
+  if (fileInput) fileInput.accept = isVideo ? 'video/*' : 'image/*';
+  if (pickBtn)   pickBtn.textContent = isVideo ? 'Choose Video' : 'Choose Photo';
+  if (startBtn)  startBtn.textContent = isVideo ? 'Compress Video' : 'Compress Photo';
+}
+modeVideo?.addEventListener('click', () => setMode('video'));
+modePhoto?.addEventListener('click', () => setMode('photo'));
+setMode('video'); // initial state
 
 // === State ===
-let videoFile   = null;      // holds the picked file (image or video)
-let estBytes    = null;      // estimated output bytes (from preset)
-let currentMode = 'video';   // 'video' | 'photo'
+let pickedFile = null;  // image OR video
+let estBytes   = null;  // estimated output bytes
 
 // === Helpers ===
 const MB = 1024 * 1024;
@@ -48,8 +82,8 @@ function estimateOutputBytes(inputBytes, preset) {
 }
 
 function updateEstimate() {
-  if (!videoFile) return;
-  estBytes = estimateOutputBytes(videoFile.size, presetSel.value);
+  if (!pickedFile) return;
+  estBytes = estimateOutputBytes(pickedFile.size, presetSel.value);
   estEl.textContent = '≈ ' + formatBytes(estBytes);
   saveRow?.classList.add('hidden');
   saveEl.textContent = '—';
@@ -95,7 +129,9 @@ function renderResult(outBlob, filename, mime) {
     sb.addEventListener('click', async () => {
       try {
         await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
-      } catch {/* user cancelled */}
+      } catch {
+        /* user cancelled */
+      }
     });
   }
 }
@@ -141,7 +177,6 @@ async function ensureFFmpeg() {
 // -----------------------------------------------------
 //  Preset → args & compressVideo
 // -----------------------------------------------------
-
 function presetToFFmpegArgs(preset, inputW = null, inputH = null) {
   let vf = [];
   let crf = 23;  // higher = smaller
@@ -173,4 +208,190 @@ function presetToFFmpegArgs(preset, inputW = null, inputH = null) {
 
 async function compressVideo(file, preset) {
   await ensureFFmpeg();
-  const { fetchFile } =
+  const { fetchFile } = ensureFFmpeg;
+
+  const inName  = 'input.' + (file.name.split('.').pop() || 'mp4');
+  const outName = 'output.mp4';
+
+  // Write to FS
+  ffmpeg.FS('writeFile', inName, await fetchFile(file));
+
+  // Progress
+  ffmpeg.setProgress(({ ratio }) => {
+    const pct = Math.min(99, Math.floor((ratio || 0) * 100));
+    progBar.style.width = pct + '%';
+    progText.textContent = `Compressing… ${pct}%`;
+  });
+
+  // Run
+  const args = ['-i', inName, ...presetToFFmpegArgs(preset), outName];
+  await ffmpeg.run(...args);
+
+  // Read output — IMPORTANT: Blob from Uint8Array (not data.buffer) for iOS
+  const data = ffmpeg.FS('readFile', outName);
+  const blob = new Blob([data], { type: 'video/mp4' });
+
+  // Cleanup
+  try { ffmpeg.FS('unlink', inName); } catch {}
+  try { ffmpeg.FS('unlink', outName); } catch {}
+
+  return blob;
+}
+
+// -----------------------------------------------------
+//  Image compression (canvas → JPEG)
+// -----------------------------------------------------
+async function compressImage(file, preset) {
+  const map = {
+    same:      { maxW: null, quality: 0.9 },
+    small:     { maxW: 1080, quality: 0.78 },
+    smallest:  { maxW: 720,  quality: 0.66 }
+  };
+  const { maxW, quality } = map[preset] ?? map.small;
+
+  // Load image
+  const blobURL = URL.createObjectURL(file);
+  const img = new Image();
+  img.decoding = 'async';
+  img.src = blobURL;
+  await img.decode();
+
+  // Compute size
+  let w = img.naturalWidth;
+  let h = img.naturalHeight;
+  if (maxW && w > maxW) {
+    const scale = maxW / w;
+    w = Math.round(maxW);
+    h = Math.round(h * scale);
+  }
+
+  // Draw
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  URL.revokeObjectURL(blobURL);
+
+  // Export JPEG
+  const outBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+  return outBlob || file; // fallback
+}
+
+// -----------------------------------------------------
+//  File picking & DnD
+// -----------------------------------------------------
+fileInput?.addEventListener('change', e => handleFile(e.target.files[0]));
+
+drop?.addEventListener('dragover', e => {
+  e.preventDefault();
+  drop.classList.add('dragover');
+});
+drop?.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+drop?.addEventListener('drop', e => {
+  e.preventDefault();
+  drop.classList.remove('dragover');
+  handleFile(e.dataTransfer.files[0]);
+});
+
+function handleFile(file) {
+  if (!file) return;
+  pickedFile = file;
+
+  const inner = document.querySelector('.drop-inner');
+  if (inner) inner.innerHTML = `<p><strong>${file.name}</strong> (${formatBytes(file.size)})</p>`;
+
+  options?.classList.remove('hidden');
+  if (origEl) origEl.textContent = formatBytes(file.size);
+  updateEstimate();
+}
+
+// -----------------------------------------------------
+//  Start compression
+// -----------------------------------------------------
+startBtn?.addEventListener('click', async () => {
+  if (!pickedFile) return;
+
+  // reset previous result
+  result?.classList.add('hidden');
+  if (result) result.innerHTML = '';
+
+  // show progress UI
+  progWrap?.classList.remove('hidden');
+  progBar.style.width = '0%';
+  progText.textContent = 'Preparing…';
+
+  try {
+    let outBlob, mime;
+    const preset = presetSel.value;
+
+    if (currentMode === 'photo') {
+      mime = 'image/jpeg';
+      // quick faux-progress for nicer UX
+      for (let w = 0; w <= 25; w += 5) {
+        await new Promise(r => setTimeout(r, 25));
+        progBar.style.width = `${w}%`;
+        progText.textContent = `Compressing… ${w}%`;
+      }
+      outBlob = await compressImage(pickedFile, preset);
+      progBar.style.width = '100%';
+      progText.textContent = 'Done!';
+    } else {
+      mime = 'video/mp4';
+      outBlob = await compressVideo(pickedFile, preset); // FFmpeg updates the bar
+      progBar.style.width = '100%';
+      progText.textContent = 'Done!';
+    }
+
+    // Savings line (use actual size if available)
+    const outBytes = outBlob.size ?? estBytes ?? pickedFile.size;
+    const savedBytes = Math.max(0, pickedFile.size - outBytes);
+    const savedPct = pickedFile.size > 0
+      ? Math.round((savedBytes / pickedFile.size) * 100)
+      : 0;
+
+    saveRow?.classList.remove('hidden');
+    if (saveEl) {
+      saveEl.textContent =
+        `${savedPct}% saved (${formatBytes(pickedFile.size)} → ${formatBytes(outBytes)})`;
+    }
+
+    const outName = makeOutName(pickedFile.name, currentMode);
+    renderResult(outBlob, outName, mime);
+
+    // Auto-open share sheet or fallback download
+    try {
+      const f = new File([outBlob], outName, { type: mime });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [f] })) {
+        await navigator.share({
+          files: [f],
+          title: 'Your compressed file is ready',
+          text: 'Choose where to save or share your new file.'
+        });
+      } else {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(outBlob);
+        link.download = outName;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          URL.revokeObjectURL(link.href);
+          link.remove();
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Share/download error:', err);
+    }
+
+    // Put % saved into the first mono <p> in the result panel
+    const pcts = result?.querySelector('p.mono');
+    if (pcts) {
+      pcts.textContent = `${savedPct}% saved (${formatBytes(pickedFile.size)} → ${formatBytes(outBytes)})`;
+    }
+  } catch (err) {
+    console.error(err);
+    progText.textContent = 'Something went wrong.';
+  }
+});
+
+// Reset
+resetBtn?.addEventListener('click', () => location.reload());
