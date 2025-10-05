@@ -181,7 +181,33 @@ startBtn.addEventListener('click', () => {
 
       // Actions: Download + Save to Photos (when supported)
       renderResult(outBlob, outName, mime);
+      // === Auto-open Share Sheet or Fallback Download ===
+try {
+  const mime = videoFile.type || "application/octet-stream";
+  const compressedBlob = new Blob(["compressed data"], { type: mime });
+  const compressedFile = new File(
+    [compressedBlob],
+    "compressed-" + videoFile.name,
+    { type: mime }
+  );
 
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [compressedFile] })) {
+    await navigator.share({
+      files: [compressedFile],
+      title: "Your compressed file is ready",
+      text: "Choose where to save or share your new file."
+    });
+    console.log("✅ Share sheet opened successfully");
+  } else {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(compressedBlob);
+    link.download = "compressed-" + videoFile.name;
+    link.click();
+    console.log("⬇️ Fallback: file downloaded instead");
+  }
+} catch (err) {
+  console.error("Share or download failed:", err);
+}
       // Put % saved line into the summary area (first <p> inside result)
       const pcts = result.querySelector('p.mono');
       if (pcts) pcts.textContent = `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
