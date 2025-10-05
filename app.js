@@ -27,6 +27,26 @@ let videoFile = null;
 let estBytes  = null;
 let currentMode = 'video'; // default
 
+// === FFmpeg (for real video compression) ===
+import { createFFmpeg, fetchFile } from 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js';
+
+const ffmpeg = createFFmpeg({
+  log: false,
+  corePath: 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/ffmpeg-core.js'
+});
+
+async function ensureFFmpeg() {
+  if (!ffmpeg.isLoaded()) {
+    // reflect loader progress in your UI
+    ffmpeg.setProgress(({ ratio }) => {
+      const pct = Math.max(1, Math.floor((ratio || 0) * 100));
+      progBar.style.width = pct + '%';
+      progText.textContent = `Preparing encoder… ${pct}%`;
+    });
+    await ffmpeg.load();
+  }
+}
+
 // === Helpers ===
 const MB = 1024 * 1024;
 function formatBytes(bytes) {
