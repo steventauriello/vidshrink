@@ -37,12 +37,14 @@ function formatBytes(bytes) {
 }
 
 function estimateOutputBytes(inputBytes, preset) {
+  // Adjusted to make top = biggest file, middle = medium, bottom = smallest
   const ratios = {
-    balanced:   0.40,
-    losslessish:0.70,
-    smaller:    0.25
+    small:     0.75, // “Small” – best quality, ~25% smaller
+    smaller:   0.45, // “Smaller” – same resolution, lower bitrate, ~55% smaller
+    smallest:  0.25  // “Smallest” – 720p, heavily compressed, ~75% smaller
   };
-  const r = ratios[preset] ?? ratios.balanced;
+
+  const r = ratios[preset] ?? ratios.smaller;
   return Math.max(0.9 * MB, Math.round(inputBytes * r));
 }
 
