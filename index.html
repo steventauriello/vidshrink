@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>VidShrink — Shrink Video Size Online (Free, Fast, No Upload)</title>
-  <meta name="description" content="Shrink video file size online for free. Compress MP4/MOV right in your browser—fast, private, and no uploads. Perfect for iPhone videos, email, Instagram, and more.">
+  <title>VidShrink — Shrink Video or Photo Size Online (Free, Fast, No Upload)</title>
+  <meta name="description" content="Shrink video or photo file size online for free. Compress MP4, MOV, JPG, PNG right in your browser—fast, private, and no uploads. Perfect for iPhone videos, photos, email, Instagram, and more.">
   <meta name="robots" content="index, follow">
 
   <!-- Ownership / attribution -->
@@ -16,60 +16,45 @@
 
   <!-- Canonical + social previews -->
   <link rel="canonical" href="https://www.vidshrink.com/">
-  <meta property="og:title" content="VidShrink — Shrink Video Size Online">
-  <meta property="og:description" content="Compress MP4/MOV in your browser. No uploads. No watermarks. Just smaller videos.">
+  <meta property="og:title" content="VidShrink — Shrink Video or Photo Size Online">
+  <meta property="og:description" content="Compress MP4, MOV, JPG, and PNG directly in your browser. No uploads. No watermarks. Just smaller files.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.vidshrink.com/">
-  <!-- Optional: add a real image and uncomment -->
-  <!-- <meta property="og:image" content="https://www.vidshrink.com/og.jpg"> -->
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- Basic theming -->
   <meta name="theme-color" content="#1a365d">
 
-  <!-- Main stylesheet -->
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Small inline polish that won’t fight your stylesheet -->
+  <!-- Minimal inline fallback styles -->
   <style>
-    :root { --brand:#3182ce; --brand-dark:#2b6cb0; --ink:#111; --muted:#6b7280; }
-    body { margin:0; color:var(--ink); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto; color:#111; }
     header.site { text-align:center; padding:2.5rem 1rem; color:#fff;
       background:linear-gradient(135deg,#2b6cb0,#3182ce); border-bottom:3px solid #1a365d; }
     header .lede { max-width:60ch; margin:.5rem auto 0; opacity:.95 }
     main.container { max-width:950px; margin:0 auto; padding:1.5rem; }
     .drop { border:2px dashed #c7d2fe; border-radius:12px; padding:2rem; background:#f8fafc; }
     .btn { border:0; border-radius:8px; padding:.75rem 1.1rem; font-weight:600; cursor:pointer; }
-    .btn.primary { background:var(--brand); color:#fff; }
-    .btn.primary:hover { background:var(--brand-dark); }
-    .btn.ghost { background:#eef2f7; color:#111; }
-    .row { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin:.75rem 0; }
-    label { font-weight:600; }
-    .mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace; }
-    .progress { background:#e5e7eb; border-radius:999px; padding:4px; }
-    .progress .bar { height:10px; border-radius:999px; width:0; background:var(--brand); transition:width .2s linear; }
-    .privacy { color:var(--muted); font-size:.95rem; }
-    .faq { margin:2rem 0; }
-    .faq details { background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:1rem 1.25rem; margin:.75rem 0; }
+    .btn.primary { background:#3182ce; color:#fff; }
+    .btn.primary:hover { background:#2b6cb0; }
     footer.site { text-align:center; padding:2rem 1rem; background:#f1f5f9; color:#374151; }
-    .skip-link { position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
-    .skip-link:focus { left:1rem; top:1rem; width:auto; height:auto; padding:.5rem .75rem; background:#111; color:#fff; border-radius:6px; z-index:1000; }
   </style>
 
-  <!-- FAQ schema (SEO) -->
+  <!-- FAQ schema for SEO -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
     "@type":"FAQPage",
     "mainEntity":[
-      {"@type":"Question","name":"How do I shrink my video file size?","acceptedAnswer":{"@type":"Answer","text":"Drop your video into VidShrink, pick a preset (Balanced is best), and download a smaller MP4. All processing is on-device—nothing uploads."}},
-      {"@type":"Question","name":"Is it safe and private?","acceptedAnswer":{"@type":"Answer","text":"Yes. Your video never leaves your device. Compression runs entirely in your browser using WebAssembly."}},
-      {"@type":"Question","name":"Does it work on iPhone?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open vidshrink.com in Safari, add to Home Screen for an app-like experience, and compress MP4/MOV clips."}}
+      {"@type":"Question","name":"How do I shrink my video or photo file size?","acceptedAnswer":{"@type":"Answer","text":"Drop your file into VidShrink, pick a preset, and download a smaller version. All processing is on-device—nothing uploads."}},
+      {"@type":"Question","name":"Is it safe and private?","acceptedAnswer":{"@type":"Answer","text":"Yes. Your files never leave your device. Compression runs entirely in your browser using WebAssembly."}},
+      {"@type":"Question","name":"Does it work on iPhone?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open vidshrink.com in Safari, add to your Home Screen for an app-like experience, and compress MP4/MOV or photos easily."}}
     ]
   }
   </script>
 
-  <!-- WebApplication + Person (extra discoverability/attribution) -->
+  <!-- WebApplication attribution -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -90,23 +75,30 @@
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site">
-    <h1>Shrink your video size — fast, private, free.</h1>
-    <p class="lede">Compress MP4/MOV in your browser. No uploads. No watermarks. Just smaller videos.</p>
+    <h1>Shrink your video or photo size — fast, private, free.</h1>
+    <p class="lede">Compress MP4, MOV, JPG, and PNG in your browser. No uploads. No watermarks. Just smaller files.</p>
   </header>
 
   <main id="main" class="container" role="main">
-    <section class="tool" aria-label="Video compressor">
+    <section class="tool" aria-label="Video and photo compressor">
+
+      <!-- Mode toggle -->
+      <div class="mode" role="tablist" aria-label="Choose what to shrink">
+        <button id="modeVideo" class="chip selected" role="tab" aria-selected="true">Video</button>
+        <button id="modePhoto" class="chip" role="tab" aria-selected="false">Photo</button>
+      </div>
+
       <!-- Drop zone -->
       <div id="drop" class="drop" aria-live="polite">
         <input id="file" type="file" accept="video/*" hidden>
         <div class="drop-inner">
-          <p><strong>Drag &amp; drop</strong> a video here, or</p>
+          <p><strong>Drag &amp; drop</strong> a file here, or</p>
           <button id="pick" class="btn" type="button" aria-controls="file">Choose Video</button>
-          <p class="hint">MP4/MOV supported. Works on iPhone and desktop.</p>
+          <p class="hint">MP4/MOV or JPG/PNG supported. Works on iPhone and desktop.</p>
         </div>
       </div>
 
-      <!-- Options appear after a file is selected -->
+      <!-- Options -->
       <div id="options" class="options hidden" aria-hidden="true">
         <div class="row">
           <label for="preset">Preset</label>
@@ -135,22 +127,22 @@
         <div id="result" class="result hidden" aria-live="polite"></div>
       </div>
 
-      <p class="privacy">Privacy: Your video never leaves your device. Compression runs locally using WebAssembly.</p>
+      <p class="privacy">Privacy: Your file never leaves your device. Compression runs locally using WebAssembly.</p>
     </section>
 
     <section class="faq" aria-label="Common questions">
       <h2>Common questions</h2>
       <details>
         <summary>What settings should I use?</summary>
-        <p><strong>Balanced</strong> is great for most uploads (email, forms, social). Use <strong>Smaller</strong> for the tiniest files. Use <strong>Lossless-ish</strong> when you need the original resolution with mild reduction.</p>
+        <p><strong>Balanced</strong> works great for most uploads (email, forms, social). Use <strong>Smaller</strong> for the tiniest files, or <strong>Lossless-ish</strong> for highest quality.</p>
       </details>
       <details>
-        <summary>Will it work with 4K videos?</summary>
-        <p>Yes, but browser compression can be slow for long 4K clips. For best results, start with short clips or use the 720p preset.</p>
+        <summary>Will it work with 4K or large photos?</summary>
+        <p>Yes — browser compression handles both, though long 4K videos or giant photos can take a few seconds.</p>
       </details>
       <details>
         <summary>Why no upload?</summary>
-        <p>It’s faster and private. Everything runs in your browser.</p>
+        <p>It’s faster and private. Everything runs entirely on your device.</p>
       </details>
     </section>
   </main>
