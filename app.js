@@ -36,17 +36,14 @@ function formatBytes(bytes) {
   return (val >= 100 ? val.toFixed(0) : val.toFixed(1)) + ' MB';
 }
 
-// Show “Same / Small / Smallest” in the right order:
-//  - same      ≈ 25% smaller (largest file)
-//  - small     ≈ 45–55% smaller
-//  - smallest  ≈ 75% smaller (smallest file)
 function estimateOutputBytes(inputBytes, preset) {
+  // top = biggest output, middle = medium, bottom = smallest
   const ratios = {
-    same:      0.75, // ~25% smaller (best quality)
-    small:     0.55, // ~45–55% smaller (good quality)
-    smallest:  0.25  // ~75% smaller (720p, smallest)
+    same:      0.75, // ~25% smaller
+    small:     0.55, // ~45–55% smaller
+    smallest:  0.25  // ~75% smaller
   };
-  const r = ratios[preset] ?? ratios.small; // default to middle option
+  const r = ratios[preset] ?? ratios.small;
   return Math.max(0.9 * MB, Math.round(inputBytes * r));
 }
 
@@ -58,7 +55,7 @@ function updateEstimate() {
   saveEl.textContent = '—';
 }
 
-// Output filename helper (kept same behavior; only ensures .jpg for photo mode)
+// Output filename helper
 function makeOutName(inputName, mode = 'video') {
   const dot = inputName.lastIndexOf('.');
   const stem = dot > -1 ? inputName.slice(0, dot) : inputName;
@@ -66,12 +63,12 @@ function makeOutName(inputName, mode = 'video') {
   return `${stem}-shrink${ext}`;
 }
 
-// Render result actions (Download + optional "Save to Photos" button)
+// Render result actions (Download + Save to Photos when available)
 function renderResult(outBlob, filename, mime) {
   const url = URL.createObjectURL(outBlob);
+  const canShareFiles = !!(navigator.canShare && navigator.canShare({ files: [new File([outBlob], filename, { type: mime })] }));
 
-  const shareSupported = !!(navigator.canShare && navigator.canShare({ files: [outBlob] }));
-  const shareBtn = shareSupported
+  const shareBtnHTML = canShareFiles
     ? `<button id="shareBtn" class="btn primary" type="button" style="margin-right:.5rem">Save to Photos</button>`
     : '';
 
@@ -80,36 +77,39 @@ function renderResult(outBlob, filename, mime) {
     <p>✅ Compression complete.</p>
     <p class="mono" style="margin-bottom:.5rem"></p>
     <div style="display:flex; flex-wrap:wrap; gap:.5rem; align-items:center">
-      ${shareBtn}
+      ${shareBtnHTML}
       <a id="downloadLink" class="btn" href="${url}" download="${filename}">Download</a>
       <span class="mono" style="margin-left:.25rem; opacity:.85">${filename}</span>
     </div>
     <p class="mono" style="margin-top:.5rem">Tip: On iPhone/Android, “Save to Photos” opens the Share sheet so you can save directly into your library.</p>
   `;
 
+  // Wire buttons
   const dl = document.getElementById('downloadLink');
-  const sb = document.getElementById('shareBtn');
+  dl.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 3000));
 
+  const sb = document.getElementById('shareBtn');
   if (sb) {
     sb.addEventListener('click', async () => {
       try {
         await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
-      } catch (_) { /* user canceled or not available */ }
+      } catch {
+        // user cancelled / no-op
+      }
     });
   }
-  dl.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 3000));
 }
 
 // === File picking & DnD ===
-pickBtn?.addEventListener('click', () => fileInput?.click());
-fileInput?.addEventListener('change', e => handleFile(e.target.files[0]));
+pickBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-drop?.addEventListener('dragover', e => {
+drop.addEventListener('dragover', e => {
   e.preventDefault();
   drop.classList.add('dragover');
 });
-drop?.addEventListener('dragleave', () => drop.classList.remove('dragover'));
-drop?.addEventListener('drop', e => {
+drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+drop.addEventListener('drop', e => {
   e.preventDefault();
   drop.classList.remove('dragover');
   handleFile(e.dataTransfer.files[0]);
@@ -127,38 +127,43 @@ function handleFile(file) {
   updateEstimate();
 }
 
-// === Mode Switching (FIX: ensure Photo button reliably switches accept & labels) ===
-modeVideo?.addEventListener('click', () => {
+// === Mode Switching ===
+modeVideo.addEventListener('click', () => {
   currentMode = 'video';
   modeVideo.classList.add('selected');
   modePhoto.classList.remove('selected');
-  if (fileInput) fileInput.accept = 'video/*,image/*'; // allow both sources; iOS returns actual chosen
+  fileInput.accept = 'video/*';
   pickBtn.textContent = 'Choose Video';
   startBtn.textContent = 'Compress Video';
 });
 
-modePhoto?.addEventListener('click', () => {
+modePhoto.addEventListener('click', () => {
   currentMode = 'photo';
   modePhoto.classList.add('selected');
   modeVideo.classList.remove('selected');
-  if (fileInput) fileInput.accept = 'image/*';
+  fileInput.accept = 'image/*';
   pickBtn.textContent = 'Choose Photo';
   startBtn.textContent = 'Compress Photo';
 });
 
 // === Preset change ===
-presetSel?.addEventListener('change', updateEstimate);
+presetSel.addEventListener('change', updateEstimate);
 
 // === “Compression” simulator ===
-startBtn?.addEventListener('click', () => {
+startBtn.addEventListener('click', () => {
   if (!videoFile) return;
+
+  // reset any previous result
+  result.classList.add('hidden');
+  result.innerHTML = '';
 
   progWrap.classList.remove('hidden');
   let width = 0;
-  const timer = setInterval(() => {
+  const timer = setInterval(async () => {
     width += 5;
     progBar.style.width = width + '%';
     progText.textContent = `Compressing… ${width}%`;
+
     if (width >= 100) {
       clearInterval(timer);
       progText.textContent = 'Done!';
@@ -173,44 +178,46 @@ startBtn?.addEventListener('click', () => {
       saveEl.textContent =
         `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
 
-      // --- Demo output Blob (replace with real compressed Blob when ready) ---
+      // --- DEMO output Blob (replace with real compressed Blob later) ---
       const mime = (currentMode === 'photo') ? 'image/jpeg' : 'video/mp4';
       const outBlob = new Blob([new Uint8Array(Math.max(outBytes, 1024))], { type: mime });
       const outName = makeOutName(videoFile.name, currentMode);
 
-      // Actions: Download + Save to Photos (when supported)
+      // Show buttons
       renderResult(outBlob, outName, mime);
 
-      // === Auto-open Share Sheet or Fallback Download (no await at top level) ===
-      (async () => {
-        try {
-          const fileForShare = new File([outBlob], outName, { type: mime });
-
-          if (navigator.share && navigator.canShare && navigator.canShare({ files: [fileForShare] })) {
-            await navigator.share({
-              files: [fileForShare],
-              title: 'Your compressed file is ready',
-              text: 'Choose where to save or share your new file.'
-            });
-            console.log('✅ Share sheet opened successfully');
-          } else {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(outBlob);
-            link.download = outName;
-            link.click();
-            console.log('⬇️ Fallback: file downloaded instead');
-          }
-        } catch (err) {
-          console.error('Share or download failed:', err);
+      // Auto-open Share Sheet (fallback to download)
+      try {
+        const f = new File([outBlob], outName, { type: mime });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [f] })) {
+          await navigator.share({
+            files: [f],
+            title: 'Your compressed file is ready',
+            text: 'Choose where to save or share your new file.'
+          });
+        } else {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(outBlob);
+          link.download = outName;
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            URL.revokeObjectURL(link.href);
+            link.remove();
+          }, 2000);
         }
-      })();
+      } catch (err) {
+        // non-fatal; user can still click the visible buttons
+        console.error('Share/download error:', err);
+      }
 
-      // Put % saved line into the summary area (first <p> inside result)
+      // Put % saved line into the summary area (first mono <p> inside result)
       const pcts = result.querySelector('p.mono');
-      if (pcts) pcts.textContent =
-        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
+      if (pcts) {
+        pcts.textContent = `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
+      }
     }
   }, 200);
 });
 
-resetBtn?.addEventListener('click', () => location.reload());
+resetBtn.addEventListener('click', () => location.reload());
