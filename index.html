@@ -188,8 +188,9 @@
   document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 
-<!-- FFmpeg UMD (wrapper) — keep version in sync with app.js corePath -->
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"></script>
+<!-- FFmpeg UMD (wrapper) — unpkg version fixes MIME error -->
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/ffmpeg.min.js"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <!-- Your app code -->
 <script type="module" src="app.js"></script>
