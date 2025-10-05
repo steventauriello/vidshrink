@@ -37,17 +37,16 @@ function formatBytes(bytes) {
 }
 
 function estimateOutputBytes(inputBytes, preset) {
-  // Adjusted to make top = biggest file, middle = medium, bottom = smallest
+  // Corrected to ensure top = largest file, middle = medium, bottom = smallest
   const ratios = {
-    small:     0.75, // “Small” – best quality, ~25% smaller
-    smaller:   0.45, // “Smaller” – same resolution, lower bitrate, ~55% smaller
-    smallest:  0.25  // “Smallest” – 720p, heavily compressed, ~75% smaller
+    same:      0.75, // ~25% smaller (best quality)
+    small:     0.55, // ~45–55% smaller (good quality)
+    smallest:  0.25  // ~75% smaller (720p, smallest)
   };
 
-  const r = ratios[preset] ?? ratios.smaller;
+  const r = ratios[preset] ?? ratios.small; // default to the middle option
   return Math.max(0.9 * MB, Math.round(inputBytes * r));
 }
-
 function updateEstimate() {
   if (!videoFile) return;
   estBytes = estimateOutputBytes(videoFile.size, presetSel.value);
