@@ -120,6 +120,14 @@ header .lede{
 }
 .hint{ color:var(--muted); margin-top:4px }
 
+.drop-inner p strong {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere; /* allows breaking mid-word */
+  word-break: break-word;  /* breaks long strings */
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
 /* =========================
    Options Panel
    ========================= */
