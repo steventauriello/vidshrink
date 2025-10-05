@@ -352,3 +352,7 @@ footer.site{
   .options .row{ grid-template-columns:1fr; gap:8px }
   .topnav{ display:none }
 }
+/* Hide native file input field */
+#file {
+  display: none !important;
+}
