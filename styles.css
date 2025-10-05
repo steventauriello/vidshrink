@@ -319,3 +319,5 @@ header .lede {
   from { opacity: 0; transform: translateY(25px); }
   to { opacity: 1; transform: translateY(0); }
 }
+#orig, #est, #save { font-variant-numeric: tabular-nums; }
+#save { color: #18c29c; }              /* green for “Savings” */
