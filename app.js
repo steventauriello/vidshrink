@@ -37,7 +37,6 @@ function formatBytes(bytes) {
 }
 
 function estimateOutputBytes(inputBytes, preset) {
-  // top = biggest output, middle = medium, bottom = smallest
   const ratios = { same: 0.75, small: 0.55, smallest: 0.25 };
   const r = ratios[preset] ?? ratios.small;
   return Math.max(0.9 * MB, Math.round(inputBytes * r));
@@ -58,6 +57,44 @@ function makeOutName(inputName, mode = 'video') {
   const ext  = (mode === 'photo') ? '.jpg' : '.mp4';
   return `${stem}-shrink${ext}`;
 }
+
+// ---------- NEW: real photo compression (canvas → JPEG) ----------
+function targetPhotoSettings(preset, w, h) {
+  // quality + scale rules
+  if (preset === 'same')   return { q: 0.92, scale: 1 };
+  if (preset === 'small')  return { q: 0.8,  scale: 0.75 };
+  // "smallest": cap long edge ~1280px
+  const long = Math.max(w, h);
+  const scale = long > 1280 ? 1280 / long : 1;
+  return { q: 0.68, scale };
+}
+
+async function compressPhotoBlob(file, preset) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = url;
+    });
+    const { q, scale } = targetPhotoSettings(preset, img.width, img.height);
+    const w = Math.max(1, Math.round(img.width  * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d', { alpha: false });
+    ctx.drawImage(img, 0, 0, w, h);
+
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', q));
+    // If toBlob returns null (rare), fall back to original file
+    return blob || file;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+// -----------------------------------------------------------------
 
 // Render result actions (Download + Save to Photos when available)
 function renderResult(outBlob, filename, mime) {
@@ -82,7 +119,6 @@ function renderResult(outBlob, filename, mime) {
     <p class="mono" style="margin-top:.5rem">Tip: On iPhone/Android, “Save to Photos” opens the Share sheet so you can save directly into your library.</p>
   `;
 
-  // Wire buttons
   const dl = document.getElementById('downloadLink');
   dl.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 3000));
 
@@ -91,7 +127,7 @@ function renderResult(outBlob, filename, mime) {
     sb.addEventListener('click', async () => {
       try {
         await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
-      } catch { /* user cancelled */ }
+      } catch {/* cancel */}
     });
   }
 }
@@ -142,11 +178,10 @@ modePhoto.addEventListener('click', () => {
 // === Preset change ===
 presetSel.addEventListener('change', updateEstimate);
 
-// === “Compression” simulator ===
+// === “Compression” simulator + real photo path ===
 startBtn.addEventListener('click', () => {
   if (!videoFile) return;
 
-  // reset any previous result
   result.classList.add('hidden');
   result.innerHTML = '';
 
@@ -162,23 +197,32 @@ startBtn.addEventListener('click', () => {
       clearInterval(timer);
       progText.textContent = 'Done!';
 
-      // === Final Output and Share Sheet Logic (single copy!) ===
-      const outBytes = estBytes ?? videoFile.size;
-      const savedBytes = Math.max(0, videoFile.size - outBytes);
+      let outBlob, mime, outName;
+
+      if (currentMode === 'photo') {
+        // REAL image compression
+        mime = 'image/jpeg';
+        outBlob = await compressPhotoBlob(videoFile, presetSel.value);
+        outName = makeOutName(videoFile.name, 'photo');
+      } else {
+        // Simulated video output (placeholder until real encoder)
+        mime = 'video/mp4';
+        const outBytes = estBytes ?? videoFile.size;
+        outBlob = new Blob([new Uint8Array(Math.max(outBytes, 1024))], { type: mime });
+        outName = makeOutName(videoFile.name, 'video');
+      }
+
+      // Compute actual savings from produced blob
+      const savedBytes = Math.max(0, videoFile.size - outBlob.size);
       const savedPct = videoFile.size > 0
         ? Math.round((savedBytes / videoFile.size) * 100)
         : 0;
 
       saveRow?.classList.remove('hidden');
       saveEl.textContent =
-        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
+        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBlob.size)})`;
 
-      // Simulated compressed Blob (swap in real encoder output later)
-      const mime = (currentMode === 'photo') ? 'image/jpeg' : 'video/mp4';
-      const outBlob = new Blob([new Uint8Array(Math.max(outBytes, 1024))], { type: mime });
-      const outName = makeOutName(videoFile.name, currentMode);
-
-      // Show result UI
+      // Show result actions
       renderResult(outBlob, outName, mime);
 
       // Auto-open Share Sheet (fallback to download)
@@ -205,10 +249,9 @@ startBtn.addEventListener('click', () => {
         console.error('Share/download error:', err);
       }
 
-      // Fill the summary line under “Compression complete.”
       const pcts = result.querySelector('p.mono');
       if (pcts) pcts.textContent =
-        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBytes)})`;
+        `${savedPct}% saved (${formatBytes(videoFile.size)} → ${formatBytes(outBlob.size)})`;
     }
   }, 200);
 });
