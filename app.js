@@ -29,18 +29,13 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 // --- iOS-safe picker button ---
 pickBtn?.addEventListener('click', () => {
   if (!fileInput) return;
-
-  // allow re-selecting the same file
-  fileInput.value = '';
-
+  fileInput.value = ''; // allow re-selecting same file
   try {
     if (typeof fileInput.showPicker === 'function') {
       fileInput.showPicker();
       return;
     }
-  } catch {
-    // some browsers throw if showPicker is blocked; fall through
-  }
+  } catch {}
   fileInput.click();
 });
 
@@ -49,10 +44,8 @@ let currentMode = 'video';
 function setMode(mode) {
   currentMode = mode;
   const isVideo = mode === 'video';
-
   modeVideo?.classList.toggle('selected', isVideo);
   modePhoto?.classList.toggle('selected', !isVideo);
-
   if (fileInput) fileInput.accept = isVideo ? 'video/*' : 'image/*';
   if (pickBtn)   pickBtn.textContent = isVideo ? 'Choose Video' : 'Choose Photo';
   if (startBtn)  startBtn.textContent = isVideo ? 'Compress Video' : 'Compress Photo';
@@ -83,11 +76,14 @@ function estimateOutputBytes(inputBytes, preset) {
 
 function updateEstimate() {
   if (!pickedFile) return;
-  estBytes = estimateOutputBytes(pickedFile.size, presetSel.value);
-  estEl.textContent = '≈ ' + formatBytes(estBytes);
+  estBytes = estimateOutputBytes(pickedFile.size, presetSel?.value);
+  if (estEl) estEl.textContent = '≈ ' + formatBytes(estBytes);
   saveRow?.classList.add('hidden');
-  saveEl.textContent = '—';
+  if (saveEl) saveEl.textContent = '—';
 }
+
+// Wire the dropdown so estimates actually change
+presetSel?.addEventListener('change', updateEstimate);
 
 // Output filename helper
 function makeOutName(inputName, mode = 'video') {
@@ -109,35 +105,33 @@ function renderResult(outBlob, filename, mime) {
     ? `<button id="shareBtn" class="btn primary" type="button" style="margin-right:.5rem">Save to Photos</button>`
     : '';
 
-  result.classList.remove('hidden');
-  result.innerHTML = `
-    <p>✅ Compression complete.</p>
-    <p class="mono" style="margin-bottom:.5rem"></p>
-    <div style="display:flex; flex-wrap:wrap; gap:.5rem; align-items:center">
-      ${shareBtnHTML}
-      <a id="downloadLink" class="btn" href="${url}" download="${filename}">Download</a>
-      <span class="mono" style="margin-left:.25rem; opacity:.85">${filename}</span>
-    </div>
-    <p class="mono" style="margin-top:.5rem">Tip: On iPhone/Android, “Save to Photos” opens the Share sheet so you can save directly into your library.</p>
-  `;
+  result?.classList.remove('hidden');
+  if (result) {
+    result.innerHTML = `
+      <p>✅ Compression complete.</p>
+      <p class="mono" style="margin-bottom:.5rem"></p>
+      <div style="display:flex; flex-wrap:wrap; gap:.5rem; align-items:center">
+        ${shareBtnHTML}
+        <a id="downloadLink" class="btn" href="${url}" download="${filename}">Download</a>
+        <span class="mono" style="margin-left:.25rem; opacity:.85">${filename}</span>
+      </div>
+      <p class="mono" style="margin-top:.5rem">Tip: On iPhone/Android, “Save to Photos” opens the Share sheet so you can save directly into your library.</p>
+    `;
+  }
 
   const dl = document.getElementById('downloadLink');
-  dl.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 3000));
+  dl?.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 3000));
 
   const sb = document.getElementById('shareBtn');
-  if (sb) {
-    sb.addEventListener('click', async () => {
-      try {
-        await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
-      } catch {
-        /* user cancelled */
-      }
-    });
-  }
+  sb?.addEventListener('click', async () => {
+    try {
+      await navigator.share({ files: [new File([outBlob], filename, { type: mime })] });
+    } catch {/* user cancelled */}
+  });
 }
 
 // -----------------------------------------------------
-//  FFmpeg loader (videos) — single definition
+//  FFmpeg loader (videos)
 // -----------------------------------------------------
 let ffmpeg;
 let ffmpegReady = false;
@@ -145,36 +139,28 @@ let ffmpegReady = false;
 async function ensureFFmpeg() {
   if (ffmpegReady) return;
 
-  // 1) Wrapper must be present (loaded in index.html BEFORE app.js)
   if (!window.FFmpeg) {
     throw new Error('FFmpeg wrapper script not found. Check the <script> tag order in index.html.');
   }
   const { createFFmpeg, fetchFile } = window.FFmpeg;
 
-  // 2) Use the same versioned core as the wrapper (set in index.html)
   const corePath =
     window.__FFMPEG_CORE_PATH ||
     'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js';
 
-  // 3) Quick sanity check that CSP/CDN lets us reach the core
+  // Optional: quick reachability probe (helps diagnose CSP/CDN issues)
   try {
     const head = await fetch(corePath, { method: 'HEAD', mode: 'cors' });
-    if (!head.ok) {
-      throw new Error(`HTTP ${head.status}`);
-    }
+    if (!head.ok) throw new Error(`HTTP ${head.status}`);
   } catch (e) {
     throw new Error(
-      `Can't fetch ffmpeg-core.js (${corePath}). Likely a CSP/worker/CDN block. ` +
-      `Make sure your CSP includes: worker-src blob: https://cdn.jsdelivr.net; ` +
+      `Can't fetch ffmpeg-core.js. Check CSP: worker-src blob: https://cdn.jsdelivr.net; ` +
       `child-src blob: https://cdn.jsdelivr.net; connect-src https://cdn.jsdelivr.net; ` +
       `and script-src includes 'wasm-unsafe-eval'.`
     );
   }
 
-  // 4) Create + load
   ffmpeg = createFFmpeg({ log: true, corePath });
-
-  // Surface FFmpeg log lines to the console so we see what's wrong
   try { ffmpeg.setLogger?.(({ type, message }) => console.log(`[ffmpeg:${type}]`, message)); } catch {}
 
   try {
@@ -184,7 +170,6 @@ async function ensureFFmpeg() {
     throw new Error('Failed to load FFmpeg core (ad blocker/CSP/worker issue?).');
   }
 
-  // expose helper for use in compressVideo
   ensureFFmpeg.fetchFile = fetchFile;
   ffmpegReady = true;
 }
@@ -197,27 +182,24 @@ function presetToFFmpegArgs(preset, inputW = null, inputH = null) {
   let crf = 23;  // higher = smaller
   let maxW = null;
 
-  if (preset === 'same') {
-    crf = 23;                 // ~25% smaller
-  } else if (preset === 'small') {
-    crf = 28; maxW = 1080;    // ~45–55% smaller
-  } else if (preset === 'smallest') {
-    crf = 30; maxW = 720;     // ~75% smaller
-  }
+  if (preset === 'same')      { crf = 23; }
+  else if (preset === 'small'){ crf = 28; maxW = 1080; }
+  else if (preset === 'smallest'){ crf = 30; maxW = 720; }
 
   if (maxW && inputW && inputH && inputW > maxW) {
-    // keep AR; ensure divisible by 2
-    vf = ['-vf', `scale='min(${maxW},iw)':'-2'`];
+    vf = ['-vf', `scale='min(${maxW},iw)':'-2'`]; // keep AR, even width
   }
 
+  // Ensure iOS-friendly pixel format
   return [
-    '-c:v', 'libx264',
+    '-pix_fmt','yuv420p',
+    '-c:v','libx264',
     '-crf', String(crf),
-    '-preset', 'veryfast',
+    '-preset','veryfast',
     ...vf,
-    '-movflags', '+faststart',
-    '-c:a', 'aac',
-    '-b:a', '128k'
+    '-movflags','+faststart',
+    '-c:a','aac',
+    '-b:a','128k'
   ];
 }
 
@@ -234,15 +216,15 @@ async function compressVideo(file, preset) {
   // Progress
   ffmpeg.setProgress(({ ratio }) => {
     const pct = Math.min(99, Math.floor((ratio || 0) * 100));
-    progBar.style.width = pct + '%';
-    progText.textContent = `Compressing… ${pct}%`;
+    progBar && (progBar.style.width = pct + '%');
+    progText && (progText.textContent = `Compressing… ${pct}%`);
   });
 
   // Run
   const args = ['-i', inName, ...presetToFFmpegArgs(preset), outName];
   await ffmpeg.run(...args);
 
-  // Read output — IMPORTANT: Blob from Uint8Array (not data.buffer) for iOS
+  // Read output — Blob from Uint8Array (not data.buffer) for iOS
   const data = ffmpeg.FS('readFile', outName);
   const blob = new Blob([data], { type: 'video/mp4' });
 
@@ -250,6 +232,7 @@ async function compressVideo(file, preset) {
   try { ffmpeg.FS('unlink', inName); } catch {}
   try { ffmpeg.FS('unlink', outName); } catch {}
 
+  if (!blob.size) throw new Error('Encoding produced an empty file (check input format or preset).');
   return blob;
 }
 
@@ -264,14 +247,12 @@ async function compressImage(file, preset) {
   };
   const { maxW, quality } = map[preset] ?? map.small;
 
-  // Load image
   const blobURL = URL.createObjectURL(file);
   const img = new Image();
   img.decoding = 'async';
   img.src = blobURL;
   await img.decode();
 
-  // Compute size
   let w = img.naturalWidth;
   let h = img.naturalHeight;
   if (maxW && w > maxW) {
@@ -280,16 +261,14 @@ async function compressImage(file, preset) {
     h = Math.round(h * scale);
   }
 
-  // Draw
   const canvas = document.createElement('canvas');
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0, w, h);
   URL.revokeObjectURL(blobURL);
 
-  // Export JPEG
   const outBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
-  return outBlob || file; // fallback
+  return outBlob || file;
 }
 
 // -----------------------------------------------------
@@ -326,38 +305,33 @@ function handleFile(file) {
 startBtn?.addEventListener('click', async () => {
   if (!pickedFile) return;
 
-  // reset previous result
   result?.classList.add('hidden');
   if (result) result.innerHTML = '';
 
-  // show progress UI
   progWrap?.classList.remove('hidden');
-  progBar.style.width = '0%';
-  progText.textContent = 'Preparing…';
+  if (progBar) progBar.style.width = '0%';
+  if (progText) progText.textContent = 'Preparing…';
 
   try {
     let outBlob, mime;
-    const preset = presetSel.value;
+    const preset = presetSel?.value || 'small';
 
     if (currentMode === 'photo') {
       mime = 'image/jpeg';
-      // quick faux-progress for nicer UX
       for (let w = 0; w <= 25; w += 5) {
         await new Promise(r => setTimeout(r, 25));
-        progBar.style.width = `${w}%`;
-        progText.textContent = `Compressing… ${w}%`;
+        if (progBar) progBar.style.width = `${w}%`;
+        if (progText) progText.textContent = `Compressing… ${w}%`;
       }
       outBlob = await compressImage(pickedFile, preset);
-      progBar.style.width = '100%';
-      progText.textContent = 'Done!';
     } else {
       mime = 'video/mp4';
-      outBlob = await compressVideo(pickedFile, preset); // FFmpeg updates the bar
-      progBar.style.width = '100%';
-      progText.textContent = 'Done!';
+      outBlob = await compressVideo(pickedFile, preset);
     }
 
-    // Savings line (use actual size if available)
+    if (progBar) progBar.style.width = '100%';
+    if (progText) progText.textContent = 'Done!';
+
     const outBytes = outBlob.size ?? estBytes ?? pickedFile.size;
     const savedBytes = Math.max(0, pickedFile.size - outBytes);
     const savedPct = pickedFile.size > 0
@@ -373,7 +347,6 @@ startBtn?.addEventListener('click', async () => {
     const outName = makeOutName(pickedFile.name, currentMode);
     renderResult(outBlob, outName, mime);
 
-    // Auto-open share sheet or fallback download
     try {
       const f = new File([outBlob], outName, { type: mime });
       if (navigator.share && navigator.canShare && navigator.canShare({ files: [f] })) {
@@ -394,123 +367,19 @@ startBtn?.addEventListener('click', async () => {
         }, 2000);
       }
     } catch (err) {
-  console.error(err);
-  progText.textContent = (err && err.message) ? String(err.message) : 'Something went wrong.';
-}
+      console.error(err);
+      if (progText) progText.textContent = (err && err.message) ? String(err.message) : 'Something went wrong.';
+    }
 
-    // Put % saved into the first mono <p> in the result panel
     const pcts = result?.querySelector('p.mono');
     if (pcts) {
       pcts.textContent = `${savedPct}% saved (${formatBytes(pickedFile.size)} → ${formatBytes(outBytes)})`;
     }
   } catch (err) {
     console.error(err);
-    progText.textContent = 'Something went wrong.';
+    if (progText) progText.textContent = 'Something went wrong.';
   }
 });
 
 // Reset
 resetBtn?.addEventListener('click', () => location.reload());
-/* ===========================
-   VidShrink – FFmpeg video patch (iOS/Safari safe)
-   Paste at the very bottom of app.js
-   =========================== */
-(() => {
-  if (window.__VS_VIDEO_PATCH__) return;
-  window.__VS_VIDEO_PATCH__ = true;
-
-  // 1) Make sure we load the exact core the page points at
-  const CORE_FALLBACK = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js";
-
-  // Override ensureFFmpeg to honor the global core path and improve errors
-  const originalEnsure = typeof ensureFFmpeg === 'function' ? ensureFFmpeg : null;
-  ensureFFmpeg = async function ensureFFmpegPatched() {
-    // If caller already loaded, we're done
-    if (typeof ffmpegReady !== 'undefined' && ffmpegReady) return;
-
-    if (!window.FFmpeg) {
-      throw new Error("FFmpeg wrapper not found. Make sure the wrapper <script> is before app.js.");
-    }
-
-    const { createFFmpeg, fetchFile } = window.FFmpeg;
-    const corePath = (window.__FFMPEG_CORE_PATH || CORE_FALLBACK);
-
-    ffmpeg = createFFmpeg({
-      log: false,
-      corePath
-    });
-
-    try {
-      await ffmpeg.load();
-    } catch (e) {
-      console.error('FFmpeg load error:', e);
-      throw new Error('Failed to load FFmpeg core. (CSP/ad-block/network)');
-    }
-
-    ensureFFmpeg.fetchFile = fetchFile;
-    ffmpegReady = true;
-  };
-
-  // 2) Force H.264 + yuv420p (iOS-friendly) and keep your other options
-  const originalPresetToArgs = typeof presetToFFmpegArgs === 'function' ? presetToFFmpegArgs : null;
-  presetToFFmpegArgs = function presetToFFmpegArgsPatched(preset, inputW = null, inputH = null) {
-    // start from your logic if present
-    let base = originalPresetToArgs ? originalPresetToArgs(preset, inputW, inputH) : [
-      '-c:v','libx264','-crf','28','-preset','veryfast','-movflags','+faststart','-c:a','aac','-b:a','128k'
-    ];
-
-    // Ensure pixel format is yuv420p for broad playback (especially iOS)
-    // and avoid duplicates if user code already added it.
-    if (!base.includes('-pix_fmt')) {
-      base = ['-pix_fmt','yuv420p', ...base];
-    }
-    return base;
-  };
-
-  // 3) Build the Blob from the Uint8Array (NOT data.buffer) — this fixes iOS
-async function compressVideo(file, preset) {
-  await ensureFFmpeg();
-  const { fetchFile } = ensureFFmpeg;
-
-  const inName  = 'input.' + (file.name.split('.').pop() || 'mp4');
-  const outName = 'output.mp4';
-
-  try {
-    ffmpeg.FS('writeFile', inName, await fetchFile(file));
-  } catch (e) {
-    console.error('FFmpeg writeFile error:', e);
-    throw new Error('Could not write input to FFmpeg FS.');
-  }
-
-  ffmpeg.setProgress(({ ratio }) => {
-    const pct = Math.min(99, Math.floor((ratio || 0) * 100));
-    if (typeof progBar !== 'undefined') progBar.style.width = pct + '%';
-    if (typeof progText !== 'undefined') progText.textContent = `Compressing… ${pct}%`;
-  });
-
-  const args = ['-i', inName, ...presetToFFmpegArgs(preset), outName];
-  try {
-    await ffmpeg.run(...args);
-  } catch (e) {
-    console.error('FFmpeg run error:', e);
-    throw new Error('FFmpeg failed while encoding this file.');
-  }
-
-  let data;
-  try {
-    data = ffmpeg.FS('readFile', outName);
-  } catch (e) {
-    console.error('FFmpeg readFile error:', e);
-    throw new Error('Could not read output from FFmpeg FS.');
-  } finally {
-    try { ffmpeg.FS('unlink', inName); } catch {}
-    try { ffmpeg.FS('unlink', outName); } catch {}
-  }
-
-  const blob = new Blob([data], { type: 'video/mp4' });
-  if (!blob.size) throw new Error('Encoding produced an empty file (check input format or preset).');
-  return blob;
-}
-
-  console.log('✅ VidShrink video patch active');
-})();
