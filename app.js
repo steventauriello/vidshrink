@@ -1,6 +1,12 @@
 // =======================================
 // VidShrink — main client script (clean)
 // =======================================
+// --- ffmpeg config (no inline scripts needed) ---
+window.__FFMPEG_CORE_PATH = "/assets/ffmpeg/ffmpeg-core.js";
+if (typeof window.FFmpeg === "undefined" && typeof FFmpeg !== "undefined") {
+  window.FFmpeg = FFmpeg;
+}
+
 
 // === DOM refs ===
 const fileInput  = document.getElementById('file');
