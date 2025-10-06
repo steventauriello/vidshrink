@@ -186,29 +186,26 @@ async function ensureFFmpeg() {
 // -----------------------------------------------------
 //  Preset → args & compressVideo
 // -----------------------------------------------------
-function presetToFFmpegArgs(preset, inputW = null, inputH = null) {
-  let vf = [];
-  let crf = 23;  // higher = smaller
+function presetToFFmpegArgs(preset) {
+  let crf = 23;            // higher = smaller
   let maxW = null;
 
-  if (preset === 'same')      { crf = 23; }
-  else if (preset === 'small'){ crf = 28; maxW = 1080; }
-  else if (preset === 'smallest'){ crf = 30; maxW = 720; }
+  if (preset === 'same')       { crf = 23; }
+  else if (preset === 'small') { crf = 28; maxW = 1080; }
+  else if (preset === 'smallest') { crf = 30; maxW = 720; }
 
-  if (maxW && inputW && inputH && inputW > maxW) {
-    vf = ['-vf', `scale='min(${maxW},iw)':'-2'`]; // keep AR, even width
-  }
+  // Always include scale when maxW is set; ffmpeg calculates min() itself.
+  const vf = maxW ? ['-vf', `scale=min(${maxW},iw):-2`] : [];
 
-  // Ensure iOS-friendly pixel format
   return [
+    // (optional mapping added below in the "nice-to-have" section)
     '-pix_fmt','yuv420p',
     '-c:v','libx264',
     '-crf', String(crf),
     '-preset','veryfast',
     ...vf,
     '-movflags','+faststart',
-    '-c:a','aac',
-    '-b:a','128k'
+    '-c:a','aac','-b:a','128k'
   ];
 }
 
