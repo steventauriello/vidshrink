@@ -148,42 +148,41 @@
       </div>
 
       <!-- Options / estimates / progress -->
-      <div id="options" class="options hidden" aria-hidden="true">
-        <div class="row">
-          <label for="preset">Here are your options:</label>
-          <select id="preset" name="preset">
-            <option value="same">Same resolution (best quality • ~25% smaller)</option>
-            <option value="small">Small (good quality • ~45–55% smaller)</option>
-            <option value="smallest">Smallest (720p • ~75% smaller)</option>
-          </select>
-        </div>
+<div id="options" class="options card hidden" aria-hidden="true">
+  <div class="row">
+    <label for="preset">Here are your options:</label>
+    <select id="preset" name="preset">
+      <option value="same">Same resolution (best quality • ~25% smaller)</option>
+      <option value="small">Small (good quality • ~45–55% smaller)</option>
+      <option value="smallest">Smallest (720p • ~75% smaller)</option>
+    </select>
+  </div>
 
-        <div class="row">
-          <label>Original size</label>
-          <div id="orig" class="mono">—</div>
-        </div>
+  <div class="row">
+    <label>Original size</label>
+    <div id="orig" class="mono">—</div>
+  </div>
 
-        <div class="row">
-          <label>Estimated output size</label>
-          <div id="est" class="mono">—</div>
-        </div>
+  <div class="row">
+    <label>Estimated output size</label>
+    <div id="est" class="mono">—</div>
+  </div>
 
-        <div class="row hidden" id="savingsRow">
-          <label>Savings</label>
-          <div id="save" class="mono">—</div>
-        </div>
+  <div class="row hidden" id="savingsRow">
+    <label>Savings</label>
+    <div id="save" class="mono">—</div>
+  </div>
 
-        <div class="row">
-          <button id="start" class="btn primary" type="button">Compress Video</button>
-          <button id="reset" class="btn ghost" type="button">Reset</button>
-        </div>
+  <div class="row">
+    <button id="start" class="btn primary" type="button">Compress Video</button>
+    <button id="reset" class="btn ghost" type="button">Reset</button>
+  </div>
 
-        <div id="progWrap" class="progress hidden" aria-hidden="true" aria-label="Progress">
-          <div id="progBar" class="bar"></div>
-          <div id="progText" class="mono" style="margin-top:.25rem" aria-live="polite">Preparing…</div>
-        </div>
-      </div> <!-- /#options -->
-
+  <div id="progWrap" class="progress hidden" aria-hidden="true" aria-label="Progress">
+    <div id="progBar" class="bar"></div>
+    <div id="progText" class="mono" style="margin-top:.25rem" aria-live="polite">Preparing…</div>
+  </div>
+</div>
       <!-- Results Panel (buttons get injected by app.js) -->
       <section id="result" class="result panel hidden" aria-live="polite"></section>
 
