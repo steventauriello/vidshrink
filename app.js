@@ -183,32 +183,6 @@ async function ensureFFmpeg() {
   ffmpegReady = true;
 }
 
-  // Optional: quick reachability probe (helps diagnose CSP/CDN issues)
-  try {
-    const head = await fetch(corePath, { method: 'HEAD', mode: 'cors' });
-    if (!head.ok) throw new Error(`HTTP ${head.status}`);
-  } catch (e) {
-    throw new Error(
-      `Can't fetch ffmpeg-core.js. Check CSP: worker-src blob: https://cdn.jsdelivr.net; ` +
-      `child-src blob: https://cdn.jsdelivr.net; connect-src https://cdn.jsdelivr.net; ` +
-      `and script-src includes 'wasm-unsafe-eval'.`
-    );
-  }
-
-  ffmpeg = createFFmpeg({ log: true, corePath });
-  try { ffmpeg.setLogger?.(({ type, message }) => console.log(`[ffmpeg:${type}]`, message)); } catch {}
-
-  try {
-    await ffmpeg.load();
-  } catch (e) {
-    console.error('FFmpeg load error:', e);
-    throw new Error('Failed to load FFmpeg core (ad blocker/CSP/worker issue?).');
-  }
-
-  ensureFFmpeg.fetchFile = fetchFile;
-  ffmpegReady = true;
-}
-
 // -----------------------------------------------------
 //  Preset → args & compressVideo
 // -----------------------------------------------------
