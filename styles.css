@@ -510,3 +510,18 @@ select:focus-visible{
     margin-left: 0;
   }
 }
+/* Compact variant that matches footer scale */
+.manifesto--compact{
+  font-size: .9rem;
+  line-height: 1.55;
+  padding: 1.25rem 1rem;
+  margin: 2rem auto 1rem;
+  max-width: 950px;
+}
+.manifesto--compact h2{
+  font-size: 1.05rem;
+  margin: 0 0 .25rem;
+  letter-spacing: -.01em;
+}
+.manifesto--compact p{ margin: .4rem 0; color: #a8b0cf; }
+.manifesto--compact .signoff{ font-size: .9rem; margin-top: .75rem; color:#eaf0ff; font-weight:600; }
