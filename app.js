@@ -357,38 +357,11 @@ startBtn?.addEventListener('click', async () => {
     renderResult(outBlob, outName, mime);
 
     try {
-      const f = new File([outBlob], outName, { type: mime });
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [f] })) {
-        await navigator.share({
-          files: [f],
-          title: 'Your compressed file is ready',
-          text: 'Choose where to save or share your new file.'
-        });
-      } else {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(outBlob);
-        link.download = outName;
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => {
-          URL.revokeObjectURL(link.href);
-          link.remove();
-        }, 2000);
-      }
-    } catch (err) {
-      console.error(err);
-      if (progText) progText.textContent = (err && err.message) ? String(err.message) : 'Something went wrong.';
-    }
+      // (Removed auto share/download — iOS blocks programmatic calls without a user gesture)
+// The buttons added by renderResult(outBlob, outName, mime) handle sharing/downloading.
 
-    const pcts = result?.querySelector('p.mono');
-    if (pcts) {
-      pcts.textContent = `${savedPct}% saved (${formatBytes(pickedFile.size)} → ${formatBytes(outBytes)})`;
-    }
-  } catch (err) {
-    console.error(err);
-    if (progText) progText.textContent = 'Something went wrong.';
-  }
-});
-
-// Reset
-resetBtn?.addEventListener('click', () => location.reload());
+const pcts = result?.querySelector('p.mono');
+if (pcts) {
+  pcts.textContent =
+    `${savedPct}% saved (${formatBytes(pickedFile.size)} → ${formatBytes(outBytes)})`;
+}
