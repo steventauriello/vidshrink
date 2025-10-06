@@ -5,3 +5,10 @@
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/assets/ffmpeg/*
+  Cross-Origin-Resource-Policy: same-origin
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/ffmpeg/ffmpeg-core.wasm
+  Content-Type: application/wasm
