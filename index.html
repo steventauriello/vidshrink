@@ -208,31 +208,11 @@
     <small>© <span id="year"></span> VidShrink • Built by Steven Tauriello. Also reachable via <strong>VideoShrink.net</strong>.</small>
   </footer>
 
-  <script>
-    // Footer year
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+  <!-- self-hosted FFmpeg wrapper -->
+<script src="/assets/ffmpeg/ffmpeg.min.js"></script>
 
-  <!-- FFmpeg UMD (wrapper) — CDN -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@latest/dist/umd/ffmpeg.min.js"
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer">
-  </script>
+<!-- your app (sets __FFMPEG_CORE_PATH in app.js) -->
+<script type="module" src="app.js"></script>
 
-  <!-- Configure core path + shim global so app.js can find FFmpeg -->
-  <script>
-    // Point the WASM core to the CDN (same major via @latest). This will auto-load the .wasm and .worker.
-    window.__FFMPEG_CORE_PATH = "https://cdn.jsdelivr.net/npm/@ffmpeg/core@latest/dist/ffmpeg-core.js";
-    // Some app code expects window.FFmpeg; make sure it's there.
-    if (typeof window.FFmpeg === "undefined" && typeof FFmpeg !== "undefined") {
-      window.FFmpeg = FFmpeg;
-    }
-  </script>
-
-  <!-- Your app code (expects window.FFmpeg and window.__FFMPEG_CORE_PATH) -->
-  <script type="module" src="app.js"></script>
-
-  <noscript>This tool needs JavaScript to run entirely on your device.</noscript>
 </body>
 </html>
