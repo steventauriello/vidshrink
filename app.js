@@ -145,14 +145,43 @@ let ffmpegReady = false;
 async function ensureFFmpeg() {
   if (ffmpegReady) return;
 
-  if (!window.FFmpeg) {
-    throw new Error('FFmpeg wrapper script not found. Check the <script> tag order in index.html.');
-  }
-  const { createFFmpeg, fetchFile } = window.FFmpeg;
+  // Robust global lookup (UMD may attach different names)
+  const FF =
+    window.FFmpeg ??
+    globalThis.FFmpeg ??
+    globalThis.ffmpeg ??
+    (globalThis.__FFmpeg || null);
 
-  const corePath =
-    window.__FFMPEG_CORE_PATH ||
-    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js';
+  if (!FF) {
+    throw new Error('FFmpeg wrapper not found — make sure /assets/ffmpeg/ffmpeg.min.js loads BEFORE app.js');
+  }
+
+  const { createFFmpeg, fetchFile } = FF;
+
+  // Always use your self-hosted core (no CDN fallback)
+  const corePath = window.__FFMPEG_CORE_PATH || "/assets/ffmpeg/ffmpeg-core.js";
+
+  // Optional: quick reachability probe (helps diagnose path/headers)
+  try {
+    const head = await fetch(corePath, { method: 'HEAD' });
+    if (!head.ok) throw new Error(`HTTP ${head.status}`);
+  } catch {
+    throw new Error(`Can't fetch ffmpeg-core.js at ${corePath}`);
+  }
+
+  ffmpeg = createFFmpeg({ log: true, corePath });
+  try { ffmpeg.setLogger?.(({ type, message }) => console.log(`[ffmpeg:${type}]`, message)); } catch {}
+
+  try {
+    await ffmpeg.load();
+  } catch (e) {
+    console.error('FFmpeg load error:', e);
+    throw new Error('Failed to load FFmpeg core (check ffmpeg-core.wasm/worker + WASM MIME).');
+  }
+
+  ensureFFmpeg.fetchFile = fetchFile;
+  ffmpegReady = true;
+}
 
   // Optional: quick reachability probe (helps diagnose CSP/CDN issues)
   try {
