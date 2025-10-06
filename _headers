@@ -1,6 +1,4 @@
 /*
-  Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: require-corp
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
   Permissions-Policy: camera=(), microphone=(), geolocation=()
@@ -12,6 +10,7 @@
     connect-src 'self' https://cdn.jsdelivr.net;
     worker-src 'self' blob: https://cdn.jsdelivr.net;
     child-src 'self' blob: https://cdn.jsdelivr.net;
+    object-src 'none';
     base-uri 'none';
     frame-ancestors 'none';
     upgrade-insecure-requests
