@@ -193,26 +193,17 @@
       </p>
 
     </section>
-  </main>
+    ...
+</main>
 
-  <section class="manifesto">
-    <h2>Let's Be Real.</h2>
-    <p>Shrinking videos and photos shouldn’t be a guessing game, a paywall, or a pop-up circus.</p>
-    <p>We built <strong>VidShrink</strong> for creators, small businesses, and families — for anyone who just wants something that works.</p>
-    <p>No accounts. No uploads. No gimmicks. Drop it in, shrink it, and move on with your day.</p>
-    <p>This was built by the people, for the people — because we know how frustrating tech can be when it should just <em>work</em>.</p>
-    <p class="signoff">I just hope this tool makes your day a little easier, a little less stressful.<br>— <strong>Steven Tauriello</strong> 🇺🇸</p>
-  </section>
+<footer class="site">
+  <small>© <span id="year"></span> VidShrink • Built by Steven Tauriello. Also reachable via <strong>VideoShrink.net</strong>.</small>
+</footer>
 
-  <footer class="site">
-    <small>© <span id="year"></span> VidShrink • Built by Steven Tauriello. Also reachable via <strong>VideoShrink.net</strong>.</small>
-  </footer>
+<!-- self-hosted FFmpeg wrapper (must load before app.js) -->
+<script defer src="/assets/ffmpeg/ffmpeg.min.js"></script>
 
-  <!-- self-hosted FFmpeg wrapper -->
-<script src="/assets/ffmpeg/ffmpeg.min.js"></script>
-
-<!-- your app (sets __FFMPEG_CORE_PATH in app.js) -->
-<script type="module" src="app.js"></script>
-
+<!-- your app -->
+<script type="module" src="/app.js"></script>
 </body>
 </html>
