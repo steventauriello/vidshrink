@@ -327,11 +327,14 @@ startBtn?.addEventListener('click', async () => {
 
     if (currentMode === 'photo') {
       mime = 'image/jpeg';
+
+      // small progress shim so photos don't look idle
       for (let w = 0; w <= 25; w += 5) {
         await new Promise(r => setTimeout(r, 25));
         if (progBar) progBar.style.width = `${w}%`;
         if (progText) progText.textContent = `Compressing… ${w}%`;
       }
+
       outBlob = await compressImage(pickedFile, preset);
     } else {
       mime = 'video/mp4';
@@ -341,9 +344,9 @@ startBtn?.addEventListener('click', async () => {
     if (progBar) progBar.style.width = '100%';
     if (progText) progText.textContent = 'Done!';
 
-    const outBytes = outBlob.size ?? estBytes ?? pickedFile.size;
+    const outBytes   = outBlob.size ?? estBytes ?? pickedFile.size;
     const savedBytes = Math.max(0, pickedFile.size - outBytes);
-    const savedPct = pickedFile.size > 0
+    const savedPct   = pickedFile.size > 0
       ? Math.round((savedBytes / pickedFile.size) * 100)
       : 0;
 
@@ -354,14 +357,20 @@ startBtn?.addEventListener('click', async () => {
     }
 
     const outName = makeOutName(pickedFile.name, currentMode);
-    renderResult(outBlob, outName, mime);
+    renderResult(outBlob, outName, mime);   // buttons handle share/download
 
-    try {
-      // (Removed auto share/download — iOS blocks programmatic calls without a user gesture)
-// The buttons added by renderResult(outBlob, outName, mime) handle sharing/downloading.
+    // Update the percent line inside the result panel
+    const pcts = result?.querySelector('p.mono');
+    if (pcts) {
+      pcts.textContent =
+        `${savedPct}% saved (${formatBytes(pickedFile.size)} → ${formatBytes(outBytes)})`;
+    }
 
-const pcts = result?.querySelector('p.mono');
-if (pcts) {
-  pcts.textContent =
-    `${savedPct}% saved (${formatBytes(pickedFile.size)} → ${formatBytes(outBytes)})`;
-}
+  } catch (err) {
+    console.error(err);
+    if (progText) {
+      const msg = (err && err.message) ? String(err.message) : 'Something went wrong.';
+      progText.textContent = msg;
+    }
+  }
+});
