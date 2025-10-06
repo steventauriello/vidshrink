@@ -361,9 +361,7 @@ footer.site{
   .topnav{ display:none }
 }
 /* Hide native file input field */
-#file {
-  display: none !important;
-}
+
 /* Visually hide but keep focusability and layout presence */
 .sr-only-file {
   position: absolute;
@@ -376,18 +374,7 @@ footer.site{
   white-space: nowrap;
 }
 /* keep input programmatically clickable on iOS (not display:none) */
-.sr-only-file{
-  position:absolute;
-  width:1px;
-  height:1px;
-  padding:0;
-  margin:-1px;
-  overflow:hidden;
-  clip:rect(0,0,0,0);
-  white-space:nowrap;
-  border:0;
-  opacity:0;
-}
+
 /* ===== VidShrink visual polish (safe: CSS-only) ===== */
 :root{
   --panel: rgba(15,21,48,0.85);
