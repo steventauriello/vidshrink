@@ -246,38 +246,81 @@ async function compressVideo(file, preset) {
 }
 
 // -----------------------------------------------------
-//  Image compression (canvas → JPEG)
+//  Image compression (auto-ensure output is smaller)
 // -----------------------------------------------------
 async function compressImage(file, preset) {
-  const map = {
-    same:      { maxW: null, quality: 0.9 },
-    small:     { maxW: 1080, quality: 0.78 },
-    smallest:  { maxW: 720,  quality: 0.66 }
-  };
-  const { maxW, quality } = map[preset] ?? map.small;
+  const isHEIC = /image\/hei(c|f)/i.test(file.type);
+  const isPNG  = /image\/png/i.test(file.type);
+  const isJPG  = /image\/jpe?g/i.test(file.type);
 
-  const blobURL = URL.createObjectURL(file);
+  // Preset knobs
+  const cfgMap = {
+    same:     { maxW: null,  target: 0.80, qStart: isHEIC ? 0.70 : 0.85, qMin: 0.60 },
+    small:    { maxW: 1280,  target: 0.55, qStart: isHEIC ? 0.60 : 0.78, qMin: 0.50 },
+    smallest: { maxW:  720,  target: 0.30, qStart: isHEIC ? 0.50 : 0.66, qMin: 0.40 },
+  };
+  const cfg = cfgMap[preset] || cfgMap.small;
+
+  // Never promise more than reality; leave at least 20 KB reduction target.
+  const targetBytes = Math.min(Math.round(file.size * cfg.target), file.size - 20 * 1024);
+
+  // Decode
+  const url = URL.createObjectURL(file);
   const img = new Image();
   img.decoding = 'async';
-  img.src = blobURL;
+  img.src = url;
   await img.decode();
+  URL.revokeObjectURL(url);
 
+  // Size
   let w = img.naturalWidth;
   let h = img.naturalHeight;
-  if (maxW && w > maxW) {
-    const scale = maxW / w;
-    w = Math.round(maxW);
-    h = Math.round(h * scale);
+  if (cfg.maxW && w > cfg.maxW) {
+    const s = cfg.maxW / w;
+    w = Math.round(cfg.maxW);
+    h = Math.round(h * s);
   }
 
+  // Canvas
   const canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, w, h);
-  URL.revokeObjectURL(blobURL);
+  const ctx = canvas.getContext('2d', { alpha: false });
+  function drawToCanvas() {
+    canvas.width = w; canvas.height = h;
+    ctx.drawImage(img, 0, 0, w, h);
+  }
+  drawToCanvas();
 
-  const outBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
-  return outBlob || file;
+  const encode = (q) => new Promise((res) => {
+    // Always export JPEG (widely supported); Safari uses sane subsampling.
+    canvas.toBlob(res, 'image/jpeg', q);
+  });
+
+  // 1) Try decreasing quality until we hit targetBytes (or qMin)
+  let q = cfg.qStart;
+  let outBlob = await encode(q);
+
+  while (outBlob && outBlob.size > targetBytes && q > cfg.qMin) {
+    q = Math.max(cfg.qMin, q - 0.05);
+    outBlob = await encode(q);
+  }
+
+  // 2) If still not smaller than original, do a light downscale + retry once
+  if (outBlob && outBlob.size >= file.size) {
+    // If we didn’t already downscale via preset, shrink ~10%
+    if (!cfg.maxW || img.naturalWidth <= cfg.maxW) {
+      w = Math.round(w * 0.9);
+      h = Math.round(h * 0.9);
+      drawToCanvas();
+    }
+    q = Math.max(cfg.qMin, q - 0.10);
+    outBlob = await encode(q);
+  }
+
+  // 3) Final guardrail: if still not smaller, return the original file
+  if (!outBlob || outBlob.size >= file.size) {
+    return file;
+  }
+  return outBlob;
 }
 
 // -----------------------------------------------------
