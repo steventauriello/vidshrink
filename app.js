@@ -3,6 +3,14 @@
 // =======================================
 
 "use strict";
+// Ensure FFmpeg UMD is available on window
+if (!window.FFmpeg) {
+  throw new Error('FFmpeg wrapper not loaded — check script order and /assets/ffmpeg/ffmpeg.min.js path');
+}
+
+// Pull the factory from the global
+const { createFFmpeg, fetchFile } = window.FFmpeg;
+
 
 // --- FFmpeg config (self-hosted core, no inline scripts) ---
 window.__FFMPEG_CORE_PATH = "/assets/ffmpeg/ffmpeg-core.js";
