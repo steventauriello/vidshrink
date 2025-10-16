@@ -212,10 +212,11 @@
   <small>© <span id="year"></span> VidShrink • Built by Steven Tauriello. Also reachable via <strong>VideoShrink.net</strong>.</small>
 </footer>
 
-<!-- FFmpeg wrapper: classic script (NO defer), must run before app.js -->
+<!-- FFmpeg wrapper: classic script (must load first) -->
 <script src="/assets/ffmpeg/ffmpeg.min.js"></script>
 
-<!-- Your app -->
-<script type="module" src="/app.js"></script>
+<!-- Your app: classic script (not module) -->
+<script src="/app.js"></script>
+
 </body>
 </html>
