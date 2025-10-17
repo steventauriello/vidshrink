@@ -2,7 +2,11 @@
 // VidShrink — main client script (polished)
 // =======================================
 
+
 "use strict";
+
+const FF_CORE_URL = "https://unpkg.com/@ffmpeg/core@0.12.7/dist/ffmpeg-core.js";
+
 // Map whatever the UMD put on window to window.FFmpeg
 if (!window.FFmpeg) {
   if (typeof FFmpeg !== "undefined") {
@@ -16,33 +20,26 @@ if (!window.FFmpeg) {
 function resolveFFmpegAPI() {
   const g = globalThis;
 
-  // Prefer the wrapper object when present
+  // Try the typical places the UMD uses
   const FF =
-    g.FFmpeg ??
-    g.FFmpegWASM ??
-    g.ffmpeg ??
-    g.__FFmpeg ??
+    (g.FFmpeg ?? g.ffmpeg ?? g.FFmpegWASM ?? g.__FFmpeg ?? null) ||
+    // As a last resort, if the property exists but is a getter, just read it:
+    (("FFmpeg" in g) ? g.FFmpeg : null);
+
+  // Helper to safely grab a function if it exists
+  const getFn = (obj, name) =>
+    (obj && typeof obj[name] === "function" && obj[name]) ||
+    (obj && obj.default && typeof obj.default[name] === "function" && obj.default[name]) ||
     null;
 
-  const createFFmpeg =
-    // On the wrapper object?
-    (FF && typeof FF.createFFmpeg === "function" && FF.createFFmpeg) ||
-    // Exposed directly on window?
-    (typeof g.createFFmpeg === "function" && g.createFFmpeg) ||
-    null;
-
-  const fetchFile =
-    (FF && typeof FF.fetchFile === "function" && FF.fetchFile) ||
-    (typeof g.fetchFile === "function" && g.fetchFile) ||
-    null;
+  const createFFmpeg = getFn(FF, "createFFmpeg") || (typeof g.createFFmpeg === "function" ? g.createFFmpeg : null);
+  const fetchFile    = getFn(FF, "fetchFile")    || (typeof g.fetchFile    === "function" ? g.fetchFile    : null);
 
   return { FF, createFFmpeg, fetchFile };
 }
 
-
 // Pull the factory from whatever the UMD provided
 let createFFmpeg, fetchFile;
-
 {
   const api = resolveFFmpegAPI();
   createFFmpeg = api.createFFmpeg;
