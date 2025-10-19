@@ -618,3 +618,72 @@ select:focus-visible{
   .mission-bottom strong { color: #fff; }
   .mission-bottom em     { color: #a7b7ff; }
 }
+/* === Unify brand blue to match desktop (header + primary buttons) === */
+header.site{
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-bottom:3px solid color-mix(in srgb, var(--brand) 55%, #0a1a4a);
+}
+#pick.btn,
+.btn.primary{
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color:#fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 28%, transparent);
+}
+.btn.primary:hover{
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--brand) 35%, transparent);
+}
+
+/* === Make the Video chip clearly disabled + readable + "COMING SOON" === */
+.mode-toggle #modeVideo[aria-disabled="true"]{
+  position: relative;
+  background: rgba(79,140,255,0.10);
+  border: 1px solid rgba(79,140,255,0.28);
+  color: color-mix(in srgb, var(--text) 70%, #9aa5c6); /* readable on light card */
+  cursor: not-allowed;
+  filter: saturate(0.85);
+}
+/* If .selected accidentally sticks, keep it dim (no bright gradient) */
+.mode-toggle #modeVideo[aria-disabled="true"].selected{
+  background: rgba(79,140,255,0.10) !important;
+  color: color-mix(in srgb, var(--text) 70%, #9aa5c6) !important;
+  border-color: rgba(79,140,255,0.28) !important;
+  box-shadow: none !important;
+}
+/* Badge so it's obvious on narrow phones */
+.mode-toggle #modeVideo[aria-disabled="true"]::after{
+  content: "COMING SOON";
+  position: absolute;
+  top: -8px; right: -6px;
+  padding: 2px 8px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: .03em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+  pointer-events: none;
+}
+@media (max-width: 420px){
+  .mode-toggle{ gap:6px; }
+  .mode-toggle button{ padding:8px 10px; font-size:.95rem; }
+  .mode-toggle #modeVideo[aria-disabled="true"]::after{ top:-10px; right:-8px; }
+}
+
+/* === Fix dropzone text contrast (light & dark) === */
+.dropzone .drop-inner p,
+.dropzone .drop-inner p strong{ color: var(--text); opacity: .98; }
+
+@media (prefers-color-scheme: light){
+  /* On light cards the text must be dark, not faded */
+  .dropzone{
+    background: color-mix(in srgb, #ffffff 96%, var(--surface) 4%);
+    border-color: color-mix(in srgb, var(--brand) 22%, transparent);
+  }
+  .dropzone .drop-inner p,
+  .dropzone .drop-inner p strong{
+    color:#0d1224;  /* crisp dark text for iOS light mode */
+    opacity: 1;
+  }
+}
+
+/* Make sure chips’ text is never too faint on mobile */
+.mode-toggle button{ color: var(--text); white-space: nowrap; }
