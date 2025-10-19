@@ -27,7 +27,7 @@
 </head>
 
 <body>
-  <!-- Header (class + container only; no logic touched) -->
+  <!-- Header -->
   <header class="site">
     <div class="container">
       <h1 class="logo">VidShrink</h1>
@@ -35,14 +35,15 @@
     </div>
   </header>
 
+  <!-- OPEN main + container (these were missing before) -->
   <main>
     <div class="container">
-      <!-- Mode toggle (unchanged IDs for app.js) -->
+
+      <!-- Mode toggle -->
       <div class="mode-toggle">
-        <button id="modeVideo" class="selected" aria-disabled="true" tabindex="-1">
-          Video (coming soon)
-        </button>
-        <button id="modePhoto">Photo</button>
+        <span class="pill pill--soon" aria-hidden="true">COMING SOON</span>
+        <button id="modeVideo" aria-disabled="true" disabled>Video</button>
+        <button id="modePhoto" class="selected">Photo</button>
       </div>
 
       <!-- Desktop/top message (mobile is swapped via CSS) -->
@@ -64,7 +65,7 @@
         </p>
       </div>
 
-      <!-- Drop zone (IDs unchanged) -->
+      <!-- Drop zone -->
       <div id="drop" class="dropzone">
         <div class="drop-inner">
           <p><strong>Drag &amp; drop</strong> a file here, or</p>
@@ -73,7 +74,7 @@
         <input type="file" id="file" hidden />
       </div>
 
-      <!-- Options (IDs unchanged) -->
+      <!-- Options -->
       <section id="options" class="hidden">
         <div class="preset-row">
           <label for="preset">Compression Level:</label>
@@ -99,14 +100,15 @@
         </div>
       </section>
 
-      <!-- Progress (IDs unchanged) -->
+      <!-- Progress -->
       <div id="progWrap" class="progress hidden">
         <div id="progBar" class="progress-bar"></div>
         <p id="progText" class="progress-text">Preparing…</p>
       </div>
 
-      <!-- Result (IDs unchanged) -->
+      <!-- Result -->
       <section id="result" class="hidden"></section>
+
     </div> <!-- /.container -->
   </main>
   
