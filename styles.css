@@ -672,14 +672,19 @@ select:focus-visible{
 .mode-toggle #modeVideo[aria-disabled="true"]::after{
   content: "COMING SOON";
   position: absolute;
-  top: -8px; right: -6px;
-  padding: 2px 8px;
-  font-size: 0.65rem; font-weight: 700; letter-spacing: .03em;
+  top: -14px;              /* moves it higher above the button */
+  left: 50%;               /* centers it horizontally */
+  transform: translateX(-50%);
+  padding: 3px 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: .03em;
   color: #fff;
   background: linear-gradient(135deg, var(--brand), var(--brand-2));
   border-radius: 999px;
   box-shadow: 0 2px 8px rgba(0,0,0,.35);
   pointer-events: none;
+  white-space: nowrap;
 }
 @media (max-width: 420px){
   .mode-toggle{ gap:6px; }
@@ -706,3 +711,30 @@ select:focus-visible{
 
 /* Make sure chips’ text is never too faint on mobile */
 .mode-toggle button{ color: var(--text); white-space: nowrap; }
+/* Neutral style for secondary/ghost so they match each other */
+.btn.secondary,
+.btn.ghost{
+  background: color-mix(in srgb, var(--panel-strong) 85%, #000 0%);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn.secondary:hover,
+.btn.ghost:hover{
+  border-color: color-mix(in srgb, var(--brand) 35%, transparent);
+}
+
+/* Unified disabled look for any button (works for <button> and <a>) */
+.btn[disabled],
+.btn:disabled,
+.btn[aria-disabled="true"],
+.btn.disabled,
+.btn.is-disabled{
+  opacity: .55;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+  filter: saturate(.85);
+  background: color-mix(in srgb, var(--panel-strong) 92%, #000 0%);
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
+  color: color-mix(in srgb, var(--text) 60%, #9aa5c6);
+}
