@@ -21,8 +21,14 @@
 
 @media (prefers-color-scheme: light){
   :root{
-    --bg:#f6f8ff;
-    --bg-grad: radial-gradient(1200px 800px at 70% -10%, #e9edff 0%, #f6f8ff 60%);
+    /* Keep the background dark and editable */
+    --page-bg:   #0B1020;   /* ← you can change this anytime */
+    --page-bg-2: #1A2447;   /* ← optional gradient accent */
+
+    --bg: var(--page-bg);
+    --bg-grad: radial-gradient(1200px 800px at 70% -10%, var(--page-bg-2) 0%, var(--page-bg) 60%);
+
+    /* Leave light-scheme overrides for text and surfaces */
     --surface:#ffffffee;
     --surface-strong:#ffffff;
     --text:#0d1224;
@@ -78,10 +84,10 @@ header.site{
 
   /* Uses your adjustable --header-blue variable */
   background:
-    linear-gradient(135deg,
-      color-mix(in oklab, var(--header-blue) 88%, #4f8cff 12%),
-      var(--header-blue)
-    );
+  linear-gradient(135deg,
+    color-mix(in oklab, var(--header-blue) 88%, #4f8cff 12%),
+    var(--header-blue)
+  );
 
   border-bottom:3px solid color-mix(in oklab, var(--header-blue) 70%, #000 30%);
 }
