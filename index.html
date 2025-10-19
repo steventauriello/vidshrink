@@ -1,221 +1,117 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Meta + SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Shrink your videos and photos — fast, private, and free. No uploads. Just smaller files." />
+  <meta name="theme-color" content="#0d3d8c" />
+  <title>VidShrink — Shrink Video or Photo Fast</title>
 
-  <title>VidShrink — Shrink Video or Photo Size Online (Free, Fast, No Upload)</title>
-  <meta name="description" content="Shrink video or photo file size online for free. Compress MP4, MOV, JPG, and PNG right in your browser — fast, private, and no uploads. Perfect for iPhone videos, photos, email, Instagram, and more.">
-  <meta name="robots" content="index, follow">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" href="/favicon-192x192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="/favicon-192x192.png" />
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/styles.css" />
 
-  <!-- Ownership / attribution -->
-  <meta name="author" content="Steven Tauriello">
-  <meta name="copyright" content="© Steven Tauriello">
-  <meta name="creator" content="Steven Tauriello">
-  <link rel="author" href="https://freedomcrate.co/">
-
-  <!-- Canonical + social previews -->
-  <link rel="canonical" href="https://www.vidshrink.com/">
-  <meta property="og:title" content="VidShrink — Shrink Video or Photo Size Online">
-  <meta property="og:description" content="Compress MP4, MOV, JPG, and PNG directly in your browser. No uploads. No watermarks. Just smaller files.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://www.vidshrink.com/">
-  <meta name="twitter:card" content="summary_large_image">
-
-  <meta name="theme-color" content="#0b1020">
-
-  <!-- No meta CSP here. CSP is set in _headers so it doesn't fight the CDN. -->
-
-  <!-- Icons -->
-  <link rel="icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png">
-
-  <!-- Performance hint for CDN -->
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-
-  <!-- Main stylesheet -->
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Minimal inline baseline styles -->
-  <style>
-    :root { color-scheme: dark; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: #eaf0ff;
-      background: radial-gradient(1200px 800px at 70% -10%, #1a2447 0%, #0b1020 60%);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-    header.site {
-      text-align: center;
-      padding: 2.5rem 1rem;
-      color: #eaf0ff;
-      background: linear-gradient(135deg, #1a2447, #0b1020);
-      border-bottom: 2px solid rgba(79, 140, 255, 0.3);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    }
-    header h1 { font-size: clamp(28px, 4vw, 46px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.3em; }
-    header .lede { max-width: 60ch; margin: 0.5rem auto 0; color: #a8b0cf; font-size: 1.1rem; }
-    main.container { max-width: 950px; margin: 0 auto; padding: 1.5rem; }
-    .drop {
-      border: 2px dashed rgba(79, 140, 255, 0.4);
-      border-radius: 12px;
-      padding: 2.5rem;
-      background: rgba(15, 21, 48, 0.85);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-    .drop:hover { border-color: #4f8cff; transform: translateY(-2px); box-shadow: 0 0 0 6px rgba(79, 140, 255, 0.15), 0 12px 28px rgba(0, 0, 0, 0.45); }
-    .btn { border: 0; border-radius: 10px; padding: 0.75rem 1.25rem; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.25s ease; }
-    .btn.primary { background: linear-gradient(135deg, #4f8cff, #8f7fff); color: #fff; box-shadow: 0 6px 16px rgba(79, 140, 255, 0.25); }
-    .btn.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79, 140, 255, 0.35); }
-    .btn.ghost { background: transparent; border: 1px solid rgba(168, 176, 207, 0.3); color: #a8b0cf; }
-    .mode { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; }
-    .chip {
-      background: rgba(79, 140, 255, 0.08);
-      color: #a8b0cf;
-      border: 1px solid rgba(79, 140, 255, 0.15);
-      border-radius: 20px;
-      padding: 0.4rem 1rem;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-    .chip.selected { background: linear-gradient(135deg, #4f8cff, #8f7fff); color: white; border-color: transparent; box-shadow: 0 0 10px rgba(79, 140, 255, 0.3); }
-    .privacy { color: #a8b0cf; font-size: 0.95rem; text-align: center; margin-top: 1.25rem; }
-    footer.site {
-      text-align: center; padding: 2.5rem 1rem; color: #a8b0cf;
-      background: rgba(15, 21, 48, 0.9); border-top: 1px solid rgba(79, 140, 255, 0.15);
-      margin-top: 3rem; font-size: 0.9rem;
-    }
-    /* Keep file input focusable for iOS showPicker() but visually hidden */
-    .sr-only-file{
-      position:absolute !important;
-      width:1px; height:1px;
-      padding:0; margin:-1px;
-      overflow:hidden;
-      clip:rect(0,0,0,0); clip-path: inset(50%);
-      white-space:nowrap; border:0;
-    }
-    .hidden{ display:none !important; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-  </style>
-
-  <!-- FAQ schema -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"FAQPage",
-    "mainEntity":[
-      {"@type":"Question","name":"How do I shrink my video or photo file size?","acceptedAnswer":{"@type":"Answer","text":"Drop your file into VidShrink, pick a preset, and download a smaller version. All processing is on-device—nothing uploads."}},
-      {"@type":"Question","name":"Is it safe and private?","acceptedAnswer":{"@type":"Answer","text":"Yes. Your files never leave your device. Compression runs entirely in your browser using WebAssembly."}},
-      {"@type":"Question","name":"Does it work on iPhone?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open vidshrink.com in Safari, add to your Home Screen for an app-like experience, and compress MP4/MOV or photos easily."}}
-    ]
-  }
+  <!-- Google Analytics (optional, safe async load) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-DNNL0065X9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-DNNL0065X9');
   </script>
 </head>
 
 <body>
-  <header class="site">
-    <h1>VidShrink</h1>
-    <p class="lede">Shrink your videos and photos — fast, private, and free. No uploads. Just smaller files.</p>
+  <header>
+    <h1 ="logo">VidShrink</h1>
+    <p class="subtitle">Shrink your videos and photos — fast, private, and free. No uploads. Just smaller files.</p>
   </header>
 
-  <main id="main" class="container" role="main">
-    <section class="tool" aria-label="Video and photo compressor">
-
-      <!-- Mode toggle -->
-      <div class="mode" role="tablist" aria-label="Choose what to shrink">
-        <button id="modeVideo" class="chip selected" role="tab" aria-selected="true">Video</button>
-        <button id="modePhoto" class="chip" role="tab" aria-selected="false">Photo</button>
-      </div>
-
-      <!-- Drop zone -->
-      <div id="drop" class="drop" aria-live="polite">
-        <!-- iOS-safe: visually hidden (NOT display:none) so .showPicker() is allowed -->
-        <input id="file" type="file" accept="video/*" class="sr-only-file" />
-        <div class="drop-inner">
-          <p><strong>Drag &amp; drop</strong> a file here, or</p>
-          <button id="pick" class="btn primary" type="button" aria-controls="file">Choose Video</button>
-          <p class="hint">Supports MP4, MOV, JPG, and PNG — works on iPhone &amp; desktop.</p>
-        </div>
-      </div>
-
-      <!-- Options / estimates / progress -->
-<div id="options" class="options card hidden" aria-hidden="true">
-  <div class="row">
-    <label for="preset">Here are your options:</label>
-    <select id="preset" name="preset">
-      <option value="same">Same resolution (best quality • ~25% smaller)</option>
-      <option value="small">Small (good quality • ~45–55% smaller)</option>
-      <option value="smallest">Smallest (720p • ~75% smaller)</option>
-    </select>
+  <main>
+  <div class="mode-toggle">
+    <button id="modeVideo" class="selected" aria-disabled="true" tabindex="-1">
+      Video (coming soon)
+    </button>
+    <button id="modePhoto">Photo</button>
   </div>
 
-  <div class="row">
-    <label>Original size</label>
-    <div id="orig" class="mono">—</div>
-  </div>
-
-  <div class="row">
-    <label>Estimated output size</label>
-    <div id="est" class="mono">—</div>
-  </div>
-
-  <div class="row hidden" id="savingsRow">
-    <label>Savings</label>
-    <div id="save" class="mono">—</div>
-  </div>
-
-  <div class="row">
-    <button id="start" class="btn primary" type="button">Compress Video</button>
-    <button id="reset" class="btn ghost" type="button">Reset</button>
-  </div>
-
-  <div id="progWrap" class="progress hidden" aria-hidden="true" aria-label="Progress">
-    <div id="progBar" class="bar"></div>
-    <div id="progText" class="mono" style="margin-top:.25rem" aria-live="polite">Preparing…</div>
-  </div>
-</div>
-      <!-- Results Panel (buttons get injected by app.js) -->
-      <section id="result" class="result card hidden" aria-live="polite"></section>
-
-      <p class="privacy">
-        Privacy: Your files never leave your device. Compression runs locally using WebAssembly.<br>
-        <strong>Zero!! Absolutely zero data is taken.</strong>
-      </p>
-
-    </section>
-    <section class="manifesto manifesto--compact" aria-labelledby="manifesto-title">
-  <h2 id="manifesto-title">Our promise</h2>
-  <p><strong>No uploads.</strong> Your files never leave your device.</p>
-  <p><strong>No tracking.</strong> We don’t store, analyze, or sell anything.</p>
-  <p><strong>Open & honest.</strong> Compression happens locally using WebAssembly.</p>
-  <p class="signoff">
-    I just hope this tool makes your day a little easier, a little less stressful.<br>
-    — <strong>Steven Tauriello</strong> 🇺🇸
+<div class="update-message">
+  <p>
+    We're building something <strong>revolutionary</strong> — a truly private, free, and powerful 
+    video compression tool for everyone. What we’re doing is <strong>pushing modern web browsers 
+    to their absolute limits</strong> — unlocking and stress-testing what’s possible right inside 
+    your browser.
+    <br><br>
+    There’s a lot of <em>tinkering</em>, a lot of <em>trial and error</em>, and thousands of lines 
+    of code being refined every day. <strong>Photo compression works now</strong>, and video 
+    compression is on the way — just give us a little time. 
+    <br><br>
+    They say <em>Rome wasn’t built in a day</em> — but that’s because <strong>we weren’t there.</strong>
+    <br><br>
+    <strong>Built for the people, by the people.</strong><br>
+    <span class="sig">— Steven Tauriello, leading the VidShrink project</span>
   </p>
-</section>
-</main>
+</div>
 
-<footer class="site">
-  <p class="footer-quote" aria-label="Inspiration">
-  “The secret of happiness is freedom; the secret of freedom is courage.”
-  <span class="attrib">— Thucydides (attributed)</span>
-</p>
-  <small>© <span id="year"></span> VidShrink • Built by Steven Tauriello. Also reachable via <strong>VideoShrink.net</strong>.</small>
+
+
+    <div id="drop" class="dropzone">
+      <div class="drop-inner">
+        <p><strong>Drag &amp; drop</strong> a file here, or</p>
+        <button id="pick" class="btn primary">Choose Video</button>
+      </div>
+      <input type="file" id="file" hidden />
+    </div>
+
+    <section id="options" class="hidden">
+      <div class="preset-row">
+        <label for="preset">Compression Level:</label>
+        <select id="preset">
+          <option value="same">Keep Quality (75%)</option>
+          <option value="small" selected>Smaller (55%)</option>
+          <option value="smallest">Smallest (25%)</option>
+        </select>
+      </div>
+
+      <div class="stats">
+        <p>Original: <span id="orig">—</span></p>
+        <p>Estimated: <span id="est">—</span></p>
+      </div>
+
+      <div id="savingsRow" class="hidden">
+        <p>Saved: <span id="save">—</span></p>
+      </div>
+
+      <div class="actions">
+        <button id="start" class="btn primary">Compress Video</button>
+        <button id="reset" class="btn secondary" disabled>Reset</button>
+      </div>
+    </section>
+
+    <div id="progWrap" class="progress hidden">
+      <div id="progBar" class="progress-bar"></div>
+      <p id="progText" class="progress-text">Preparing…</p>
+    </div>
+
+    <section id="result" class="hidden"></section>
+  </main>
+
+ <footer>
+  <p>© <span id="year"></span> VidShrink. Built for privacy.</p>
 </footer>
 
-<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
+<!-- ========= LOCAL FFmpeg SCRIPTS ========= -->
+<script src="/assets/ffmpeg/ffmpeg.js"></script>
+<script>console.log("ffmpeg.js executed:", !!window.FFmpeg);</script>
 
-<!-- Your app (non-module script) -->
-<script src="/app.js" type="text/javascript" defer></script>
+<script src="/assets/ffmpeg/index.min.js"></script>
+<script>console.log("index.min.js executed:", !!window.FFmpegUtil);</script>
 
+<script defer src="/app.js?v=11"></script>
 </body>
 </html>

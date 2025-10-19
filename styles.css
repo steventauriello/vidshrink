@@ -512,3 +512,149 @@ select:focus-visible{
 }
 .manifesto--compact p{ margin: .4rem 0; color: #a8b0cf; }
 .manifesto--compact .signoff{ font-size: .9rem; margin-top: .75rem; color:#eaf0ff; font-weight:600; }
+
+/* ===== Compatibility patch for current HTML classes ===== */
+
+/* Mode toggle: style your buttons the same as .chip */
+.mode-toggle button{
+  appearance:none; cursor:pointer; font-weight:600;
+  padding: 8px 12px; border-radius: 999px;
+  border:1px solid rgba(79,140,255,0.18);
+  background: rgba(79,140,255,0.07);
+  color: var(--text);
+}
+.mode-toggle button:hover{ border-color: var(--brand); }
+.mode-toggle button.selected{
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color:#fff;
+  border-color: transparent;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 28%, transparent);
+}
+
+/* Dropzone: your HTML uses .dropzone; map it to .drop look */
+.dropzone{
+  background: var(--surface);
+  border: 1px dashed color-mix(in srgb, var(--muted) 60%, transparent);
+  border-radius: var(--radius);
+  padding: clamp(22px, 4vw, 32px);
+  box-shadow: var(--shadow);
+  transition: border-color .2s, box-shadow .2s, transform .1s;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.dropzone.dragover,
+.dropzone:hover{
+  border-color: var(--brand);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 6px rgba(79,140,255,0.12), 0 14px 30px rgba(0,0,0,0.45);
+}
+
+/* Progress bar: your HTML uses .progress-bar on #progBar */
+.progress .progress-bar,
+#progBar.progress-bar,
+.progress .bar{
+  height:10px;
+  width:0%;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  transition: width .25s ease;
+}
+
+/* Options rows: your HTML uses .preset-row */
+#options .preset-row{
+  display:grid;
+  grid-template-columns: minmax(140px, 240px) 1fr;
+  align-items:center;
+  gap: .75rem 1rem;
+  padding: 6px 0;
+}
+.mode-toggle [aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#modeVideo[aria-disabled="true"],
+#modeVideo.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.update-message {
+  margin: 1.5rem auto;
+  max-width: 640px;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #b7c3da;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+}
+
+.update-message strong {
+  color: #ffffff;
+}
+
+.update-message em {
+  color: #7fa6ff;
+  font-style: italic;
+}
+
+.update-message {
+  margin: 1.5rem auto;
+  max-width: 900px; /* wider box */
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.45; /* slightly tighter */
+  color: #b7c3da;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+}
+
+.update-message strong {
+  color: #ffffff;
+}
+
+.update-message em {
+  color: #7fa6ff;
+  font-style: italic;
+}
+
+.update-message {
+  margin: 1.5rem auto;
+  max-width: 900px; /* wider box */
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.45; /* slightly tighter */
+  color: #b7c3da;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+}
+
+.update-message strong {
+  color: #ffffff;
+}
+
+.update-message em {
+  color: #7fa6ff;
+  font-style: italic;
+}
+
+.update-message {
+  margin: 1.5rem auto;
+  max-width: 1200px; /* wider — adjust up to 1200px if you want */
+  padding: 1.25rem 1.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #b7c3da;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+}
