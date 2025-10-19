@@ -16,6 +16,7 @@
   --radius:16px;
   --shadow: 0 8px 30px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.35);
   --outline: 0 0 0 3px #4f8cff40;
+  --header-blue: #0E184B;
 }
 
 @media (prefers-color-scheme: light){
@@ -74,15 +75,24 @@ header.site{
   text-align:center;
   padding:2.5rem 1rem;
   color:#fff;
-  background:linear-gradient(135deg, #2563eb, #1e40af);
-  border-bottom:3px solid #1e3a8a;
+
+  /* Uses your adjustable --header-blue variable */
+  background:
+    linear-gradient(135deg,
+      color-mix(in oklab, var(--header-blue) 88%, #4f8cff 12%),
+      var(--header-blue)
+    );
+
+  border-bottom:3px solid color-mix(in oklab, var(--header-blue) 70%, #000 30%);
 }
+
 .site h1{
   font-size: clamp(28px, 3.6vw, 44px);
   line-height:1.1;
   margin: 32px 0 10px;
   letter-spacing:-0.02em;
 }
+
 header .lede{
   max-width:60ch;
   margin:.5rem auto 0;
@@ -619,10 +629,7 @@ select:focus-visible{
   .mission-bottom em     { color: #a7b7ff; }
 }
 /* === Unify brand blue to match desktop (header + primary buttons) === */
-header.site{
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  border-bottom:3px solid color-mix(in srgb, var(--brand) 55%, #0a1a4a);
-}
+
 #pick.btn,
 .btn.primary{
   background: linear-gradient(135deg, var(--brand), var(--brand-2));
@@ -633,20 +640,26 @@ header.site{
   box-shadow: 0 12px 26px color-mix(in srgb, var(--brand) 35%, transparent);
 }
 
-/* === Make the Video chip clearly disabled + readable + "COMING SOON" === */
-.mode-toggle #modeVideo[aria-disabled="true"]{
-  position: relative;
-  background: rgba(79,140,255,0.10);
-  border: 1px solid rgba(79,140,255,0.28);
-  color: color-mix(in srgb, var(--text) 70%, #9aa5c6); /* readable on light card */
+/* Consolidated disabled state (covers aria-disabled + disabled) */
+.mode-toggle button[disabled],
+.mode-toggle [aria-disabled="true"],
+#modeVideo[aria-disabled="true"],
+#modeVideo.disabled{
+  position: relative;              /* ← add this */
+  opacity: .55;
   cursor: not-allowed;
-  filter: saturate(0.85);
+  pointer-events: none;
+  filter: saturate(.85);
+  background: rgba(79,140,255,.10);
+  border: 1px solid rgba(79,140,255,.28);
+  color: color-mix(in srgb, var(--text) 70%, #9aa5c6);
 }
-/* If .selected accidentally sticks, keep it dim (no bright gradient) */
+
+/* If .selected sticks on the disabled button, keep it dim */
 .mode-toggle #modeVideo[aria-disabled="true"].selected{
-  background: rgba(79,140,255,0.10) !important;
+  background: rgba(79,140,255,.10) !important;
   color: color-mix(in srgb, var(--text) 70%, #9aa5c6) !important;
-  border-color: rgba(79,140,255,0.28) !important;
+  border-color: rgba(79,140,255,.28) !important;
   box-shadow: none !important;
 }
 /* Badge so it's obvious on narrow phones */
