@@ -658,3 +658,27 @@ select:focus-visible{
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(4px);
 }
+/* Desktop hides bottom version */
+.mission-bottom {
+  display: none;
+}
+
+/* Mobile shows it beautifully at the bottom */
+@media (max-width: 768px) {
+  .update-message { display: none; } /* hides your top version */
+  .mission-bottom {
+    display: block;
+    margin: 1.5rem auto;
+    padding: 1rem 1.25rem;
+    max-width: 95%;
+    background: rgba(18, 22, 40, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #e7ecff;
+    text-align: center;
+  }
+  .mission-bottom strong { color: #fff; }
+  .mission-bottom em { color: #a7b7ff; }
+}
