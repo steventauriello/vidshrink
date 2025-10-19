@@ -27,112 +27,121 @@
 </head>
 
 <body>
-  <header>
-    <h1 ="logo">VidShrink</h1>
-    <p class="subtitle">Shrink your videos and photos — fast, private, and free. No uploads. Just smaller files.</p>
+  <!-- Header (class + container only; no logic touched) -->
+  <header class="site">
+    <div class="container">
+      <h1 class="logo">VidShrink</h1>
+      <p class="subtitle">Shrink your videos and photos — fast, private, and free. No uploads. Just smaller files.</p>
+    </div>
   </header>
 
   <main>
-  <div class="mode-toggle">
-    <button id="modeVideo" class="selected" aria-disabled="true" tabindex="-1">
-      Video (coming soon)
-    </button>
-    <button id="modePhoto">Photo</button>
-  </div>
-
-<div class="update-message">
-  <p>
-    We're building something <strong>revolutionary</strong> — a truly private, free, and powerful 
-    video compression tool for everyone. What we’re doing is <strong>pushing modern web browsers 
-    to their absolute limits</strong> — unlocking and stress-testing what’s possible right inside 
-    your browser.
-    <br><br>
-    There’s a lot of <em>tinkering</em>, a lot of <em>trial and error</em>, and thousands of lines 
-    of code being refined every day. <strong>Photo compression works now</strong>, and video 
-    compression is on the way — just give us a little time. 
-    <br><br>
-    They say <em>Rome wasn’t built in a day</em> — but that’s because <strong>we weren’t there.</strong>
-    <br><br>
-    <strong>Built for the people, by the people.</strong><br>
-    <span class="sig">— Steven Tauriello, leading the VidShrink project</span>
-  </p>
-</div>
-
-
-
-    <div id="drop" class="dropzone">
-      <div class="drop-inner">
-        <p><strong>Drag &amp; drop</strong> a file here, or</p>
-        <button id="pick" class="btn primary">Choose Video</button>
-      </div>
-      <input type="file" id="file" hidden />
-    </div>
-
-    <section id="options" class="hidden">
-      <div class="preset-row">
-        <label for="preset">Compression Level:</label>
-        <select id="preset">
-          <option value="same">Keep Quality (75%)</option>
-          <option value="small" selected>Smaller (55%)</option>
-          <option value="smallest">Smallest (25%)</option>
-        </select>
+    <div class="container">
+      <!-- Mode toggle (unchanged IDs for app.js) -->
+      <div class="mode-toggle">
+        <button id="modeVideo" class="selected" aria-disabled="true" tabindex="-1">
+          Video (coming soon)
+        </button>
+        <button id="modePhoto">Photo</button>
       </div>
 
-      <div class="stats">
-        <p>Original: <span id="orig">—</span></p>
-        <p>Estimated: <span id="est">—</span></p>
+      <!-- Desktop/top message (mobile is swapped via CSS) -->
+      <div class="update-message">
+        <p>
+          We're building something <strong>revolutionary</strong> — a truly private, free, and powerful 
+          video compression tool for everyone. What we’re doing is <strong>pushing modern web browsers 
+          to their absolute limits</strong> — unlocking and stress-testing what’s possible right inside 
+          your browser.
+          <br><br>
+          There’s a lot of <em>tinkering</em>, a lot of <em>trial and error</em>, and thousands of lines 
+          of code being refined every day. <strong>Photo compression works now</strong>, and video 
+          compression is on the way — just give us a little time. 
+          <br><br>
+          They say <em>Rome wasn’t built in a day</em> — but that’s because <strong>we weren’t there.</strong>
+          <br><br>
+          <strong>Built for the people, by the people.</strong><br>
+          <span class="sig">— Steven Tauriello, leading the VidShrink project</span>
+        </p>
       </div>
 
-      <div id="savingsRow" class="hidden">
-        <p>Saved: <span id="save">—</span></p>
+      <!-- Drop zone (IDs unchanged) -->
+      <div id="drop" class="dropzone">
+        <div class="drop-inner">
+          <p><strong>Drag &amp; drop</strong> a file here, or</p>
+          <button id="pick" class="btn primary">Choose Video</button>
+        </div>
+        <input type="file" id="file" hidden />
       </div>
 
-      <div class="actions">
-        <button id="start" class="btn primary">Compress Video</button>
-        <button id="reset" class="btn secondary" disabled>Reset</button>
+      <!-- Options (IDs unchanged) -->
+      <section id="options" class="hidden">
+        <div class="preset-row">
+          <label for="preset">Compression Level:</label>
+          <select id="preset">
+            <option value="same">Keep Quality (75%)</option>
+            <option value="small" selected>Smaller (55%)</option>
+            <option value="smallest">Smallest (25%)</option>
+          </select>
+        </div>
+
+        <div class="stats">
+          <p>Original: <span id="orig">—</span></p>
+          <p>Estimated: <span id="est">—</span></p>
+        </div>
+
+        <div id="savingsRow" class="hidden">
+          <p>Saved: <span id="save">—</span></p>
+        </div>
+
+        <div class="actions">
+          <button id="start" class="btn primary">Compress Video</button>
+          <button id="reset" class="btn secondary" disabled>Reset</button>
+        </div>
+      </section>
+
+      <!-- Progress (IDs unchanged) -->
+      <div id="progWrap" class="progress hidden">
+        <div id="progBar" class="progress-bar"></div>
+        <p id="progText" class="progress-text">Preparing…</p>
       </div>
-    </section>
 
-    <div id="progWrap" class="progress hidden">
-      <div id="progBar" class="progress-bar"></div>
-      <p id="progText" class="progress-text">Preparing…</p>
-    </div>
-
-    <section id="result" class="hidden"></section>
+      <!-- Result (IDs unchanged) -->
+      <section id="result" class="hidden"></section>
+    </div> <!-- /.container -->
   </main>
   
-  <!-- Mission statement at bottom for mobile -->
-<section class="mission-bottom">
-  <p>
-    We're building something <strong>revolutionary</strong> — a truly private, free,
-    and powerful video compression tool for everyone. What we're doing is
-    <strong>pushing modern web browsers to their absolute limits</strong> —
-    unlocking and stress-testing what's possible right inside your browser.
-  </p>
+  <!-- Mission statement at bottom for mobile (shown via CSS) -->
+  <section class="mission-bottom">
+    <p>
+      We're building something <strong>revolutionary</strong> — a truly private, free,
+      and powerful video compression tool for everyone. What we're doing is
+      <strong>pushing modern web browsers to their absolute limits</strong> —
+      unlocking and stress-testing what's possible right inside your browser.
+    </p>
 
-  <p>
-    There's a lot of <em>tinkering</em>, a lot of <em>trial and error</em>, and thousands of lines of code
-    being refined every day. <strong>Photo compression works now</strong>, and video compression is
-    on the way — just give us a little time. They say <em>Rome wasn't built in a day</em> —
-    but that's because <strong>we weren't there.</strong>
-  </p>
+    <p>
+      There's a lot of <em>tinkering</em>, a lot of <em>trial and error</em>, and thousands of lines of code
+      being refined every day. <strong>Photo compression works now</strong>, and video compression is
+      on the way — just give us a little time. They say <em>Rome wasn't built in a day</em> —
+      but that's because <strong>we weren't there.</strong>
+    </p>
 
-  <p><strong>Built for the people, by the people.</strong><br>
-    — Steven Tauriello, leading the VidShrink project
-  </p>
-</section>
+    <p><strong>Built for the people, by the people.</strong><br>
+      — Steven Tauriello, leading the VidShrink project
+    </p>
+  </section>
 
- <footer>
-  <p>© <span id="year"></span> VidShrink. Built for privacy.</p>
-</footer>
+  <footer>
+    <p>© <span id="year"></span> VidShrink. Built for privacy.</p>
+  </footer>
 
-<!-- ========= LOCAL FFmpeg SCRIPTS ========= -->
-<script src="/assets/ffmpeg/ffmpeg.js"></script>
-<script>console.log("ffmpeg.js executed:", !!window.FFmpeg);</script>
+  <!-- ========= LOCAL FFmpeg SCRIPTS ========= -->
+  <script src="/assets/ffmpeg/ffmpeg.js"></script>
+  <script>console.log("ffmpeg.js executed:", !!window.FFmpeg);</script>
 
-<script src="/assets/ffmpeg/index.min.js"></script>
-<script>console.log("index.min.js executed:", !!window.FFmpegUtil);</script>
+  <script src="/assets/ffmpeg/index.min.js"></script>
+  <script>console.log("index.min.js executed:", !!window.FFmpegUtil);</script>
 
-<script defer src="/app.js?v=11"></script>
+  <script defer src="/app.js?v=11"></script>
 </body>
 </html>
