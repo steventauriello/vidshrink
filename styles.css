@@ -155,6 +155,17 @@ header .lede{
   padding: clamp(18px, 3.6vw, 26px);
   overflow:hidden; /* prevent overflow artifacts */
 }
+/* Fix: prevent mobile dropdown clipping */
+#options, .options {
+  overflow: visible;
+  position: relative;
+  z-index: 0;
+}
+#options select {
+  position: relative;
+  z-index: 2;
+}
+
 .options .row{
   display:grid;
   grid-template-columns: 160px 1fr;
@@ -223,6 +234,23 @@ select:focus{ box-shadow: var(--outline); border-color: transparent }
   border:1px solid color-mix(in srgb, var(--muted) 40%, transparent);
   color:var(--muted);
 }
+/* Base button stays the same */
+.btn { height: 42px; padding: 0 .95rem; font-weight: 600; }
+
+/* Enabled primary = brand gradient (Compress, Save to Photos, Download when ready) */
+.btn.primary:not([disabled]) {
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 28%, transparent);
+}
+
+/* Enabled secondary (Reset when a file is present, etc.) */
+.btn.secondary:not([disabled]) {
+  background: color-mix(in srgb, var(--surface-strong) 85%, #000 0%);
+  color: color-mix(in srgb, var(--text) 88%, #dbe4ff);
+  border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
+}
+
 
 /* =========================
    Progress
@@ -318,6 +346,7 @@ footer.site{
   border-color: transparent;
   box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 28%, transparent);
 }
+
 
 /* =========================
    Manifesto Block
@@ -584,13 +613,6 @@ select:focus-visible{
   padding: 6px 0;
 }
 
-/* Disable state for Video chip/button */
-.mode-toggle [aria-disabled="true"],
-#modeVideo[aria-disabled="true"],
-#modeVideo.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 /* ===== Mission statement (single source of truth) ===== */
 /* Desktop/tablet top message */
@@ -662,35 +684,48 @@ select:focus-visible{
 }
 
 /* If .selected sticks on the disabled button, keep it dim */
-.mode-toggle #modeVideo[aria-disabled="true"].selected{
+.mode-toggle #modeVideo[aria-disabled="true"].selected {
   background: rgba(79,140,255,.10) !important;
   color: color-mix(in srgb, var(--text) 70%, #9aa5c6) !important;
   border-color: rgba(79,140,255,.28) !important;
   box-shadow: none !important;
 }
-/* Badge so it's obvious on narrow phones */
-.mode-toggle #modeVideo[aria-disabled="true"]::after{
+
+/* Clean, centered COMING SOON pill above disabled Video button */
+#modeVideo[disabled]::after,
+#modeVideo[aria-disabled="true"]::after {
   content: "COMING SOON";
   position: absolute;
-  top: -14px;              /* moves it higher above the button */
-  left: 50%;               /* centers it horizontally */
+  left: 50%;
+  bottom: calc(100% + 6px);
   transform: translateX(-50%);
   padding: 3px 10px;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: .03em;
+  white-space: nowrap;
   color: #fff;
   background: linear-gradient(135deg, var(--brand), var(--brand-2));
   border-radius: 999px;
   box-shadow: 0 2px 8px rgba(0,0,0,.35);
   pointer-events: none;
-  white-space: nowrap;
+  z-index: 1;
 }
-@media (max-width: 420px){
-  .mode-toggle{ gap:6px; }
-  .mode-toggle button{ padding:8px 10px; font-size:.95rem; }
-  .mode-toggle #modeVideo[aria-disabled="true"]::after{ top:-10px; right:-8px; }
+
+/* Make sure container allows pill to show */
+.mode-toggle {
+  position: relative;
+  overflow: visible;
 }
+
+/* Fine-tune for small screens */
+@media (max-width: 420px) {
+  #modeVideo[disabled]::after,
+  #modeVideo[aria-disabled="true"]::after {
+    bottom: calc(100% + 8px);
+  }
+}
+
 
 /* === Fix dropzone text contrast (light & dark) === */
 .dropzone .drop-inner p,
