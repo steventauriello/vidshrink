@@ -561,93 +561,26 @@ select:focus-visible{
 
 /* Options rows: your HTML uses .preset-row */
 #options .preset-row{
-  display:grid;
+  display: grid;
   grid-template-columns: minmax(140px, 240px) 1fr;
-  align-items:center;
+  align-items: center;
   gap: .75rem 1rem;
   padding: 6px 0;
 }
-.mode-toggle [aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+
+/* Disable state for Video chip/button */
+.mode-toggle [aria-disabled="true"],
 #modeVideo[aria-disabled="true"],
 #modeVideo.disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ===== Mission statement (single source of truth) ===== */
+/* Desktop/tablet top message */
 .update-message {
   margin: 1.5rem auto;
-  max-width: 640px;
-  padding: 1.25rem 1.5rem;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #b7c3da;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(4px);
-}
-
-.update-message strong {
-  color: #ffffff;
-}
-
-.update-message em {
-  color: #7fa6ff;
-  font-style: italic;
-}
-
-.update-message {
-  margin: 1.5rem auto;
-  max-width: 900px; /* wider box */
-  padding: 1.25rem 1.5rem;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  font-size: 0.95rem;
-  line-height: 1.45; /* slightly tighter */
-  color: #b7c3da;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(4px);
-}
-
-.update-message strong {
-  color: #ffffff;
-}
-
-.update-message em {
-  color: #7fa6ff;
-  font-style: italic;
-}
-
-.update-message {
-  margin: 1.5rem auto;
-  max-width: 900px; /* wider box */
-  padding: 1.25rem 1.5rem;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  font-size: 0.95rem;
-  line-height: 1.45; /* slightly tighter */
-  color: #b7c3da;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(4px);
-}
-
-.update-message strong {
-  color: #ffffff;
-}
-
-.update-message em {
-  color: #7fa6ff;
-  font-style: italic;
-}
-
-.update-message {
-  margin: 1.5rem auto;
-  max-width: 1200px; /* wider — adjust up to 1200px if you want */
+  max-width: 1200px;          /* wide so it wraps less on desktop */
   padding: 1.25rem 1.75rem;
   background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
@@ -658,14 +591,17 @@ select:focus-visible{
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(4px);
 }
-/* Desktop hides bottom version */
-.mission-bottom {
-  display: none;
-}
+.update-message strong { color: #ffffff; }
+.update-message em     { color: #7fa6ff; font-style: italic; }
 
-/* Mobile shows it beautifully at the bottom */
+/* Bottom mission card is hidden on desktop by default */
+.mission-bottom { display: none; }
+
+/* ===== Mobile layout ===== */
 @media (max-width: 768px) {
-  .update-message { display: none; } /* hides your top version */
+  /* Hide the top mission on phones; show the bottom one near footer */
+  .update-message { display: none; }
+
   .mission-bottom {
     display: block;
     margin: 1.5rem auto;
@@ -680,5 +616,5 @@ select:focus-visible{
     text-align: center;
   }
   .mission-bottom strong { color: #fff; }
-  .mission-bottom em { color: #a7b7ff; }
+  .mission-bottom em     { color: #a7b7ff; }
 }
