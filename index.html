@@ -12,7 +12,7 @@
   <link rel="icon" href="/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" href="/favicon-192x192.png" sizes="192x192" />
   <link rel="apple-touch-icon" href="/favicon-192x192.png" />
-  
+
   <!-- Styles -->
   <link rel="stylesheet" href="/styles.css" />
 
@@ -35,7 +35,7 @@
     </div>
   </header>
 
-  <!-- OPEN main + container (these were missing before) -->
+  <!-- Main -->
   <main>
     <div class="container">
 
@@ -45,17 +45,17 @@
         <button id="modePhoto" class="selected">Photo</button>
       </div>
 
-      <!-- Desktop/top message (mobile is swapped via CSS) -->
+      <!-- Desktop/top message (mobile shows a shorter version via CSS) -->
       <div class="update-message">
         <p>
-          We're building something <strong>revolutionary</strong> — a truly private, free, and powerful 
-          video compression tool for everyone. What we’re doing is <strong>pushing modern web browsers 
-          to their absolute limits</strong> — unlocking and stress-testing what’s possible right inside 
+          We're building something <strong>revolutionary</strong> — a truly private, free, and powerful
+          video compression tool for everyone. What we’re doing is <strong>pushing modern web browsers
+          to their absolute limits</strong> — unlocking and stress-testing what’s possible right inside
           your browser.
           <br><br>
-          There’s a lot of <em>tinkering</em>, a lot of <em>trial and error</em>, and thousands of lines 
-          of code being refined every day. <strong>Photo compression works now</strong>, and video 
-          compression is on the way — just give us a little time. 
+          There’s a lot of <em>tinkering</em>, a lot of <em>trial and error</em>, and thousands of lines
+          of code being refined every day. <strong>Photo compression works now</strong>, and video
+          compression is on the way — just give us a little time.
           <br><br>
           They say <em>Rome wasn’t built in a day</em> — but that’s because <strong>we weren’t there.</strong>
           <br><br>
@@ -77,11 +77,11 @@
       <section id="options" class="hidden">
         <div class="preset-row">
           <label for="preset">Compression Level:</label>
-          <select id="preset">
-            <option value="same">Keep Quality (75%)</option>
-            <option value="small" selected>Smaller (55%)</option>
-            <option value="smallest">Smallest (25%)</option>
-          </select>
+        <select id="preset">
+          <option value="same">Keep Quality (75%)</option>
+          <option value="small" selected>Smaller (55%)</option>
+          <option value="smallest">Smallest (25%)</option>
+        </select>
         </div>
 
         <div class="stats">
@@ -108,9 +108,16 @@
       <!-- Result -->
       <section id="result" class="hidden"></section>
 
+      <!-- OneZip / Bulk Mode link -->
+      <div class="onezip-cta" style="text-align:center; margin-top:2rem;">
+        <a href="/bulk.html" class="link" style="font-size:1rem;">
+          Need to shrink multiple photos? <strong>Try OneZip →</strong>
+        </a>
+      </div>
+
     </div> <!-- /.container -->
   </main>
-  
+
   <!-- Mission statement at bottom for mobile (shown via CSS) -->
   <section class="mission-bottom">
     <p>
@@ -119,14 +126,12 @@
       <strong>pushing modern web browsers to their absolute limits</strong> —
       unlocking and stress-testing what's possible right inside your browser.
     </p>
-
     <p>
       There's a lot of <em>tinkering</em>, a lot of <em>trial and error</em>, and thousands of lines of code
       being refined every day. <strong>Photo compression works now</strong>, and video compression is
       on the way — just give us a little time. They say <em>Rome wasn't built in a day</em> —
       but that's because <strong>we weren't there.</strong>
     </p>
-
     <p><strong>Built for the people, by the people.</strong><br>
       — Steven Tauriello, leading the VidShrink project
     </p>

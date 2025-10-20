@@ -773,3 +773,23 @@ select:focus-visible{
   border-color: color-mix(in srgb, var(--border) 60%, transparent);
   color: color-mix(in srgb, var(--text) 60%, #9aa5c6);
 }
+/* ===== OneZip (Bulk Mode) niceties ===== */
+#start, #progWrap, #result, #shareButtons {
+  scroll-margin-top: 80px;
+}
+
+.thumb-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.link {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+.link:hover {
+  opacity: 1;
+}
