@@ -1,34 +1,80 @@
-/* =========================
-   Design Tokens
-   ========================= */
+/* =========================================================
+   VIDSHRINK — CLEANED & ORGANIZED STYLES
+   - All **design knobs** live in Section 1 (tokens & variables)
+   - No layout/logic changes; selectors kept intact
+   ========================================================= */
+
+/* =========================================================
+   1) DESIGN TOKENS & ADJUSTABLE KNOBS
+   ========================================================= */
 :root{
+  /* Brand & base colors */
   --bg: #0b1020;
   --bg-grad: radial-gradient(1200px 800px at 70% -10%, #1a2447 0%, #0b1020 60%);
   --surface: #0f1530cc;
   --surface-strong:#141b3a;
   --text: #eaf0ff;
+  --text-subtle: #a8b0cf;
   --muted:#a8b0cf;
   --brand:#4f8cff;
   --brand-2:#8f7fff;
   --success:#18c29c;
   --danger:#ff6b6b;
 
+  /* Header & typography */
+  --header-blue: #0E184B;
+  --header-padding: 1.6rem;   /* ← Header height (top/bottom space) */
+  --header-font:    2.1rem;   /* ← “VidShrink” title size */
+
+  /* Panels / borders / focus */
+  --panel: rgba(15,21,48,0.85);
+  --panel-strong: rgba(15,21,48,0.95);
+  --border: rgba(79,140,255,0.18);
+  --border-strong: rgba(79,140,255,0.30);
+  --ring: rgba(79,140,255,0.35);
+
+  /* Radii, shadows, outlines */
   --radius:16px;
   --shadow: 0 8px 30px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.35);
   --outline: 0 0 0 3px #4f8cff40;
+}
+/* ======================================
+   PAGE-SPECIFIC VARIABLE OVERRIDES
+   ====================================== */
+
+/* Default (Home / shared) */
+:root.home {
+  --header-padding: 1.6rem;
+  --header-font: 2.1rem;
+
   --header-blue: #0E184B;
+  --brand: #4f8cff;
+  --brand-2: #8f7fff;
+  --bg: #0b1020;
+  --text: #eaf0ff;
 }
 
+/* Bulk Page */
+:root.bulk {
+  --header-padding: 1.2rem;   /* slightly shorter header */
+  --header-font: 2.0rem;      /* smaller title text */
+
+  --header-blue: #0E184B;     /* deeper blue header */
+  --brand: #0078ff;           /* brighter blue buttons */
+  --brand-2: #66b2ff;         /* accent color */
+  --bg: #0a0f20;              /* darker background */
+  --text: #f5f8ff;            /* slightly brighter text */
+}
+
+/* Light-scheme tweaks (keeps your dark page but corrects surfaces/text) */
 @media (prefers-color-scheme: light){
   :root{
-    /* Keep the background dark and editable */
-    --page-bg:   #0B1020;   /* ← you can change this anytime */
-    --page-bg-2: #1A2447;   /* ← optional gradient accent */
+    --page-bg:   #0B1020;   /* editable dark background (still dark) */
+    --page-bg-2: #1A2447;
 
     --bg: var(--page-bg);
     --bg-grad: radial-gradient(1200px 800px at 70% -10%, var(--page-bg-2) 0%, var(--page-bg) 60%);
 
-    /* Leave light-scheme overrides for text and surfaces */
     --surface:#ffffffee;
     --surface-strong:#ffffff;
     --text:#0d1224;
@@ -38,11 +84,71 @@
   }
 }
 
-/* =========================
-   Base
-   ========================= */
-*{box-sizing:border-box}
-html,body{height:100%}
+/* Optional responsive auto-scale for header knobs (tweak as desired) */
+@media (max-width: 1024px){
+  :root{ --header-padding: 1.4rem; --header-font: 2.0rem; }
+}
+@media (max-width: 768px){
+  :root{ --header-padding: 1.1rem; --header-font: 1.8rem; }
+}
+
+/* ============================================
+   PROMO / NAV LINKS (Home + OneZip)
+   ============================================ */
+
+/* The "Need to shrink multiple photos?" link */
+a.try-onezip,
+a.try-onezip:visited {
+  color: #FFD65C; /* warm yellow-gold */
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.25s ease, transform 0.2s ease;
+}
+
+a.try-onezip:hover {
+  color: #fff; /* brighten on hover */
+  transform: translateY(-1px);
+  text-shadow: 0 0 6px rgba(255, 214, 92, 0.7);
+}
+
+ /* The “← Home” button on Bulk Page */
+.home-return {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #ff9f43;       /* orange button color */
+  color: #fff;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  text-decoration: none;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+  transition: background 0.2s ease, transform 0.15s ease;
+  z-index: 10; /* keeps it above header background */
+}
+
+.home-return:hover {
+  background: #ffb85e;
+  transform: translateY(-1px);
+}
+
+header.site {
+  position: relative; /* anchors absolute home-return */
+}
+
+}
+
+a.home-return:hover {
+  background: linear-gradient(135deg, #ffb13d, #ffd97a);
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   2) BASE / RESET
+   ========================================================= */
+*{ box-sizing: border-box }
+html,body{ height:100% }
 body{
   margin:0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
@@ -58,9 +164,9 @@ body{
   margin: clamp(16px, 2.5vh, 24px) auto 72px;
 }
 
-/* =========================
-   Topbar (optional)
-   ========================= */
+/* =========================================================
+   3) TOPBAR (optional)
+   ========================================================= */
 .topbar{
   position:sticky; top:0; z-index:10;
   -webkit-backdrop-filter: saturate(140%) blur(8px);
@@ -74,31 +180,34 @@ body{
 .topnav a{color:var(--muted); text-decoration:none; margin-left:18px; font-weight:500}
 .topnav a:hover{color:var(--text)}
 
-/* =========================
-   Header / Hero
-   ========================= */
+/* =========================================================
+   4) HEADER / HERO
+   ========================================================= */
 header.site{
   text-align:center;
-  padding:2.5rem 1rem;
+  padding: var(--header-padding) 1rem; /* adjustable */
   color:#fff;
-
-  /* Uses your adjustable --header-blue variable */
   background:
-  linear-gradient(135deg,
-    color-mix(in oklab, var(--header-blue) 88%, #4f8cff 12%),
-    var(--header-blue)
-  );
-
+    linear-gradient(135deg,
+      color-mix(in oklab, var(--header-blue) 88%, #4f8cff 12%),
+      var(--header-blue)
+    );
   border-bottom:3px solid color-mix(in oklab, var(--header-blue) 70%, #000 30%);
+  transition: padding .2s ease;
+}
+/* Reduce the extra 72px container margin inside header only */
+header.site .container{
+  margin: clamp(12px, 1.5vh, 16px) auto 10px;
 }
 
 .site h1{
-  font-size: clamp(28px, 3.6vw, 44px);
+  font-size: var(--header-font); /* adjustable */
   line-height:1.1;
-  margin: 32px 0 10px;
+  margin: 6px 0 4px;
   letter-spacing:-0.02em;
 }
 
+/* (Legacy class kept for safety; index uses .subtitle) */
 header .lede{
   max-width:60ch;
   margin:.5rem auto 0;
@@ -106,10 +215,15 @@ header .lede{
   font-weight:400;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
+header.site .subtitle{
+  margin: 0;
+  font-size: .95rem;
+  opacity: .92;
+}
 
-/* =========================
-   Tool Card
-   ========================= */
+/* =========================================================
+   5) TOOL CARD / DROPZONE
+   ========================================================= */
 .tool{ margin-top:18px; }
 
 .drop{
@@ -128,43 +242,29 @@ header .lede{
   box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand) 25%, transparent), var(--shadow);
 }
 .drop-inner{
-  display:grid;
-  place-items:center;
-  gap:10px;
-  text-align:center;
+  display:grid; place-items:center; gap:10px; text-align:center;
   padding: 28px 10px;
 }
 .hint{ color:var(--muted); margin-top:4px }
-
-.drop-inner p strong {
-  display: inline-block;
-  max-width: 100%;
-  overflow-wrap: anywhere; /* allows breaking mid-word */
-  word-break: break-word;  /* breaks long strings */
-  text-overflow: ellipsis;
-  overflow: hidden;
+.drop-inner p strong{
+  display:inline-block; max-width:100%;
+  overflow-wrap:anywhere; word-break:break-word; text-overflow:ellipsis; overflow:hidden;
 }
-/* =========================
-   Options Panel
-   ========================= */
+
+/* =========================================================
+   6) OPTIONS PANEL
+   ========================================================= */
 .options{
   margin-top:18px;
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: clamp(18px, 3.6vw, 26px);
-  overflow:hidden; /* prevent overflow artifacts */
+  overflow:hidden;
 }
-/* Fix: prevent mobile dropdown clipping */
-#options, .options {
-  overflow: visible;
-  position: relative;
-  z-index: 0;
-}
-#options select {
-  position: relative;
-  z-index: 2;
-}
+/* Prevent mobile dropdown clipping */
+#options, .options { overflow: visible; position: relative; z-index: 0; }
+#options select { position: relative; z-index: 2; }
 
 .options .row{
   display:grid;
@@ -184,9 +284,7 @@ select, input[type="file"]{
   border-radius: 12px;
   outline:none;
   display:block;
-  width:100%;
-  max-width:100%;
-  box-sizing:border-box;
+  width:100%; max-width:100%; box-sizing:border-box;
 }
 select:focus{ box-shadow: var(--outline); border-color: transparent }
 
@@ -195,9 +293,9 @@ select:focus{ box-shadow: var(--outline); border-color: transparent }
 #orig, #est, #save { font-variant-numeric: tabular-nums; }
 #save { color: var(--success); }
 
-/* =========================
-   Buttons
-   ========================= */
+/* =========================================================
+   7) BUTTONS
+   ========================================================= */
 .btn{
   appearance:none; border:0; cursor:pointer;
   padding:12px 18px; border-radius:12px;
@@ -205,6 +303,7 @@ select:focus{ box-shadow: var(--outline); border-color: transparent }
   background: color-mix(in srgb, var(--surface-strong) 85%, #000 0%);
   color:var(--text);
   transition: transform .06s ease, box-shadow .2s ease, background .2s ease, opacity .2s;
+  height: 42px; padding: 0 .95rem;
 }
 .btn:hover{ transform:translateY(-1px) }
 .btn:active{ transform:translateY(0) }
@@ -212,13 +311,12 @@ select:focus{ box-shadow: var(--outline); border-color: transparent }
 
 /* Big blue picker button */
 #pick.btn{
-  background: var(--brand);
-  color:#fff;
+  background: var(--brand); color:#fff;
   box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 28%, transparent);
 }
 #pick.btn:hover{ background: var(--brand-2); }
 
-/* Primary gradient button */
+/* Primary gradient */
 .btn.primary{
   background: linear-gradient(135deg, var(--brand), var(--brand-2));
   color:#fff;
@@ -228,50 +326,48 @@ select:focus{ box-shadow: var(--outline); border-color: transparent }
   box-shadow: 0 12px 26px color-mix(in srgb, var(--brand) 35%, transparent);
 }
 
-/* Ghost button */
+/* Secondary / Ghost */
 .btn.ghost{
   background: transparent;
   border:1px solid color-mix(in srgb, var(--muted) 40%, transparent);
   color:var(--muted);
 }
-/* Base button stays the same */
-.btn { height: 42px; padding: 0 .95rem; font-weight: 600; }
-
-/* Enabled primary = brand gradient (Compress, Save to Photos, Download when ready) */
-.btn.primary:not([disabled]) {
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  color: #fff;
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 28%, transparent);
-}
-
-/* Enabled secondary (Reset when a file is present, etc.) */
 .btn.secondary:not([disabled]) {
   background: color-mix(in srgb, var(--surface-strong) 85%, #000 0%);
   color: color-mix(in srgb, var(--text) 88%, #dbe4ff);
   border: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
 }
 
+/* Unified disabled look */
+.btn[disabled], .btn:disabled, .btn[aria-disabled="true"], .btn.disabled, .btn.is-disabled{
+  opacity: .55; cursor: not-allowed; pointer-events: none; box-shadow: none; filter: saturate(.85);
+  background: color-mix(in srgb, var(--panel-strong) 92%, #000 0%);
+  border-color: color-mix(in srgb, var(--border) 60%, transparent);
+  color: color-mix(in srgb, var(--text) 60%, #9aa5c6);
+}
 
-/* =========================
-   Progress
-   ========================= */
+/* =========================================================
+   8) PROGRESS
+   ========================================================= */
 .progress{
   margin-top:18px;
   background: var(--surface-strong);
-  border-radius: 12px;
-  overflow:hidden;
+  border-radius: 12px; overflow:hidden;
   border:1px solid color-mix(in srgb, var(--muted) 25%, transparent);
+  height: 8px;
 }
-.bar{
-  height:10px;
-  width:0%;
+.bar{ height:10px; width:0%; background: linear-gradient(90deg, var(--brand), var(--brand-2)); transition: width .25s ease; }
+.progress .bar{ height:100% }
+.progress .progress-bar,
+#progBar.progress-bar,
+.progress .bar{
   background: linear-gradient(90deg, var(--brand), var(--brand-2));
   transition: width .25s ease;
 }
 
-/* =========================
-   Result
-   ========================= */
+/* =========================================================
+   9) RESULT
+   ========================================================= */
 .result{
   margin-top:18px;
   background: color-mix(in srgb, var(--surface) 88%, transparent);
@@ -279,26 +375,26 @@ select:focus{ box-shadow: var(--outline); border-color: transparent }
   border-radius: 12px;
   padding:16px;
 }
+#result p{ margin: .25rem 0; }
+#result .btn{ white-space: nowrap; }
 
-/* =========================
-   Privacy note
-   ========================= */
+/* =========================================================
+   10) PRIVACY NOTE
+   ========================================================= */
 .privacy{
   color:var(--muted);
   margin: 16px 2px 0;
   display:flex; align-items:center; gap:10px;
 }
 .privacy::before{
-  content:"";
-  inline-size:18px; block-size:18px;
-  border-radius:6px;
+  content:""; inline-size:18px; block-size:18px; border-radius:6px;
   background: color-mix(in srgb, var(--success) 85%, white 0%);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 18%, transparent);
 }
 
-/* =========================
-   FAQ
-   ========================= */
+/* =========================================================
+   11) FAQ
+   ========================================================= */
 .faq{
   margin-top: 28px;
   background: var(--surface);
@@ -317,17 +413,17 @@ details{
 details[open]{ border-color: color-mix(in srgb, var(--brand) 35%, transparent) }
 summary{ cursor:pointer; font-weight:600 }
 
-/* =========================
-   Footer
-   ========================= */
+/* =========================================================
+   12) FOOTER
+   ========================================================= */
 footer.site{
   text-align:center; color:var(--muted);
   padding:40px 0 60px;
 }
 
-/* =========================
-   Mode Toggle (Video / Photo)
-   ========================= */
+/* =========================================================
+   13) MODE TOGGLE (Video / Photo)
+   ========================================================= */
 .mode{ display:flex; gap:8px; margin: 0 0 12px; }
 .chip{
   appearance:none;
@@ -342,15 +438,138 @@ footer.site{
 .chip:hover{ border-color: var(--brand); }
 .chip.selected{
   background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  color:#fff;
-  border-color: transparent;
+  color:#fff; border-color: transparent;
   box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 28%, transparent);
 }
 
+/* Compatibility: your HTML uses .mode-toggle buttons */
+.mode-toggle button{
+  appearance:none; cursor:pointer; font-weight:600;
+  padding: 8px 12px; border-radius: 999px;
+  border:1px solid rgba(79,140,255,0.18);
+  background: rgba(79,140,255,0.07);
+  color: var(--text);
+}
+.mode-toggle button:hover{ border-color: var(--brand); }
+.mode-toggle button.selected{
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color:#fff; border-color: transparent;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 28%, transparent);
+}
 
-/* =========================
-   Manifesto Block
-   ========================= */
+/* Disabled state + COMING SOON pill */
+.mode-toggle button[disabled],
+.mode-toggle [aria-disabled="true"],
+#modeVideo[aria-disabled="true"],
+#modeVideo.disabled{
+  position: relative;
+  opacity: .55; cursor: not-allowed; pointer-events: none; filter: saturate(.85);
+  background: rgba(79,140,255,.10);
+  border: 1px solid rgba(79,140,255,.28);
+  color: color-mix(in srgb, var(--text) 70%, #9aa5c6);
+}
+.mode-toggle #modeVideo[aria-disabled="true"].selected{
+  background: rgba(79,140,255,.10) !important;
+  color: color-mix(in srgb, var(--text) 70%, #9aa5c6) !important;
+  border-color: rgba(79,140,255,.28) !important;
+  box-shadow: none !important;
+}
+#modeVideo[disabled]::after,
+#modeVideo[aria-disabled="true"]::after{
+  content: "COMING SOON";
+  position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%);
+  padding: 3px 10px; font-size: 0.68rem; font-weight: 700; letter-spacing: .03em; white-space: nowrap;
+  color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.35); pointer-events: none; z-index: 1;
+}
+.mode-toggle{ position: relative; overflow: visible; }
+@media (max-width: 420px){
+  #modeVideo[disabled]::after, #modeVideo[aria-disabled="true"]::after{ bottom: calc(100% + 8px); }
+}
+
+/* =========================================================
+   14) MISSION / MESSAGING
+   ========================================================= */
+.update-message{
+  margin: 1.5rem auto;
+  max-width: 1200px;
+  padding: 1.25rem 1.75rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  font-size: 0.95rem; line-height: 1.4;
+  color: #b7c3da; text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  backdrop-filter: blur(4px);
+}
+.update-message strong{ color:#fff }
+.update-message em{ color:#7fa6ff; font-style: italic; }
+
+.mission-bottom{ display:none; }
+
+@media (max-width: 768px){
+  .update-message{ display:none; }
+  .mission-bottom{
+    display:block;
+    margin:1.5rem auto; padding:1rem 1.25rem; max-width:95%;
+    background: rgba(18,22,40,0.9);
+    border-radius:12px; box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+    font-size:.95rem; line-height:1.5; color:#e7ecff; text-align:center;
+  }
+  .mission-bottom strong{ color:#fff }
+  .mission-bottom em{ color:#a7b7ff }
+}
+
+/* =========================================================
+   15) EXTRA POLISH (cards, buttons, inputs)
+   ========================================================= */
+#options, #result{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: clamp(16px, 2vw, 22px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+  margin-top: 1rem;
+}
+#options .row{
+  display: grid; grid-template-columns: minmax(140px, 240px) 1fr;
+  align-items: center; gap: .75rem 1rem; padding: 6px 0;
+}
+#options .row label{ color: var(--text-subtle); font-weight: 600; }
+#options select, #options .mono{ width:100% }
+
+.drop{ transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.drop.dragover, .drop:hover{
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 6px rgba(79,140,255,0.12), 0 14px 30px rgba(0,0,0,0.45);
+}
+.chip{
+  background: rgba(79,140,255,0.07);
+  border-color: rgba(79,140,255,0.18);
+}
+.chip.selected{
+  box-shadow: 0 0 0 3px rgba(79,140,255,0.18), 0 8px 18px rgba(79,140,255,0.22);
+}
+.btn.primary{ box-shadow: 0 8px 18px rgba(79,140,255,0.25); }
+.btn:focus-visible{ outline:0; box-shadow: 0 0 0 3px var(--ring); }
+select{
+  background: var(--panel-strong);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  height: 42px; padding: 0 .75rem;
+}
+select:focus-visible{ outline:0; box-shadow: 0 0 0 3px var(--ring); }
+.mono{ opacity:.95 }
+.hint{ color: var(--text-subtle); }
+
+@media (max-width: 640px){
+  #options .row{ grid-template-columns: 1fr; }
+  #options .row .btn{ width:100% }
+  #options .row .btn + .btn{ margin-left:0 }
+}
+
+/* Manifesto block (unchanged) */
 .manifesto{
   text-align:center;
   background: radial-gradient(900px 400px at center, rgba(79,140,255,0.08), transparent 70%);
@@ -371,425 +590,50 @@ footer.site{
   margin-bottom: 0.8rem;
   letter-spacing: -0.015em;
 }
-.manifesto p{
-  line-height: 1.65;
-  font-size: 1.05rem;
-  margin: 1rem 0;
-  color: #c3c9e6;
-}
+.manifesto p{ line-height: 1.65; font-size: 1.05rem; margin: 1rem 0; color: #c3c9e6; }
 .manifesto strong{ color: #4f8cff; }
 .manifesto .signoff{
-  font-style: italic;
-  color: #8f98c9;
-  margin-top: 1.8rem;
-  font-size: 1rem;
-  line-height: 1.5;
+  font-style: italic; color: #8f98c9; margin-top: 1.8rem;
+  font-size: 1rem; line-height: 1.5;
 }
-@keyframes fadeInUp{
-  from{ opacity:0; transform: translateY(25px); }
-  to  { opacity:1; transform: translateY(0); }
-}
+@keyframes fadeInUp{ from{opacity:0; transform: translateY(25px);} to{opacity:1; transform: translateY(0);} }
 
-/* =========================
-   Utilities
-   ========================= */
+/* =========================================================
+   16) UTILITIES & RESPONSIVE
+   ========================================================= */
 .hidden{ display:none !important }
 
-/* Reduced motion accessibility */
 @media (prefers-reduced-motion: reduce){
   *{ animation: none !important; transition: none !important; }
 }
-
-/* Responsive polish */
 @media (max-width: 720px){
   .options .row{ grid-template-columns:1fr; gap:8px }
   .topnav{ display:none }
 }
-/* Hide native file input field */
 
-/* Visually hide but keep focusability and layout presence */
-.sr-only-file {
-  position: absolute;
-  width: 1px; height: 1px;
-  margin: -1px; padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);           /* legacy clip */
-  clip-path: inset(50%);         /* modern */
-  white-space: nowrap;
-}
-/* keep input programmatically clickable on iOS (not display:none) */
-
-/* ===== VidShrink visual polish (safe: CSS-only) ===== */
-:root{
-  --panel: rgba(15,21,48,0.85);
-  --panel-strong: rgba(15,21,48,0.95);
-  --border: rgba(79,140,255,0.18);
-  --border-strong: rgba(79,140,255,0.30);
-  --ring: rgba(79,140,255,0.35);
-  --text-subtle: #a8b0cf;
-  --text: #eaf0ff;
+/* Visually hide native file input but keep accessible */
+.sr-only-file{
+  position: absolute; width:1px; height:1px;
+  margin:-1px; padding:0; border:0; overflow:hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }
 
-/* Make options + result look like calm cards without touching HTML */
-#options,
-#result{
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: clamp(16px, 2vw, 22px);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.35);
-  margin-top: 1rem;
-}
-
-/* Tidy, aligned rows */
-#options .row{
-  display: grid;
-  grid-template-columns: minmax(140px, 240px) 1fr;
-  align-items: center;
-  gap: 0.75rem 1rem;
-  padding: 6px 0;
-}
-#options .row label{
-  color: var(--text-subtle);
-  font-weight: 600;
-}
-#options select,
-#options .mono{
-  width: 100%;
-}
-
-/* Progress bar: smoother + less busy */
-.progress{
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  height: 8px;
-  overflow: hidden;
-  margin-top: .75rem;
-}
-.progress .bar{
-  width: 0%;
-  height: 100%;
-  background: linear-gradient(90deg, #4f8cff, #8f7fff);
-  transition: width .25s ease;
-}
-
-/* Result panel spacing */
-#result p{ margin: .25rem 0; }
-#result .btn{ white-space: nowrap; }
-
-/* Drop zone: calmer hover/drag state */
-.drop{
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
-}
-.drop.dragover,
-.drop:hover{
-  border-color: var(--border-strong);
-  transform: translateY(-1px);
-  box-shadow: 0 0 0 6px rgba(79,140,255,0.12), 0 14px 30px rgba(0,0,0,0.45);
-}
-
-/* Mode chips */
-.chip{
-  background: rgba(79,140,255,0.07);
-  border-color: rgba(79,140,255,0.18);
-}
-.chip.selected{
-  box-shadow: 0 0 0 3px rgba(79,140,255,0.18), 0 8px 18px rgba(79,140,255,0.22);
-}
-
-/* Buttons: consistent height & focus */
-.btn{
-  height: 42px;
-  padding: 0 .95rem;
-}
-.btn.primary{
-  box-shadow: 0 8px 18px rgba(79,140,255,0.25);
-}
-.btn:focus-visible{
-  outline: 0;
-  box-shadow: 0 0 0 3px var(--ring);
-}
-
-/* Inputs: consistent look */
-select{
-  background: var(--panel-strong);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  height: 42px;
-  padding: 0 .75rem;
-}
-select:focus-visible{
-  outline: 0;
-  box-shadow: 0 0 0 3px var(--ring);
-}
-
-/* Type tweaks */
-.mono{ opacity: 0.95; }
-.hint{ color: var(--text-subtle); }
-
-/* Mobile: stack rows */
-@media (max-width: 640px){
-  #options .row{
-    grid-template-columns: 1fr;
-  }
-  #options .row .btn{
-    width: 100%;
-  }
-  #options .row .btn + .btn{
-    margin-left: 0;
-  }
-}
-/* Compact variant that matches footer scale */
-.manifesto--compact{
-  font-size: .9rem;
-  line-height: 1.55;
-  padding: 1.25rem 1rem;
-  margin: 2rem auto 1rem;
-  max-width: 950px;
-}
-.manifesto--compact h2{
-  font-size: 1.05rem;
-  margin: 0 0 .25rem;
-  letter-spacing: -.01em;
-}
-.manifesto--compact p{ margin: .4rem 0; color: #a8b0cf; }
-.manifesto--compact .signoff{ font-size: .9rem; margin-top: .75rem; color:#eaf0ff; font-weight:600; }
-
-/* ===== Compatibility patch for current HTML classes ===== */
-
-/* Mode toggle: style your buttons the same as .chip */
-.mode-toggle button{
-  appearance:none; cursor:pointer; font-weight:600;
-  padding: 8px 12px; border-radius: 999px;
-  border:1px solid rgba(79,140,255,0.18);
-  background: rgba(79,140,255,0.07);
-  color: var(--text);
-}
-.mode-toggle button:hover{ border-color: var(--brand); }
-.mode-toggle button.selected{
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  color:#fff;
-  border-color: transparent;
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 28%, transparent);
-}
-
-/* Dropzone: your HTML uses .dropzone; map it to .drop look */
-.dropzone{
-  background: var(--surface);
-  border: 1px dashed color-mix(in srgb, var(--muted) 60%, transparent);
-  border-radius: var(--radius);
-  padding: clamp(22px, 4vw, 32px);
-  box-shadow: var(--shadow);
-  transition: border-color .2s, box-shadow .2s, transform .1s;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-}
-.dropzone.dragover,
-.dropzone:hover{
-  border-color: var(--brand);
-  transform: translateY(-1px);
-  box-shadow: 0 0 0 6px rgba(79,140,255,0.12), 0 14px 30px rgba(0,0,0,0.45);
-}
-
-/* Progress bar: your HTML uses .progress-bar on #progBar */
-.progress .progress-bar,
-#progBar.progress-bar,
-.progress .bar{
-  height:10px;
-  width:0%;
-  background: linear-gradient(90deg, var(--brand), var(--brand-2));
-  transition: width .25s ease;
-}
-
-/* Options rows: your HTML uses .preset-row */
-#options .preset-row{
-  display: grid;
-  grid-template-columns: minmax(140px, 240px) 1fr;
-  align-items: center;
-  gap: .75rem 1rem;
-  padding: 6px 0;
-}
-
-
-/* ===== Mission statement (single source of truth) ===== */
-/* Desktop/tablet top message */
-.update-message {
-  margin: 1.5rem auto;
-  max-width: 1200px;          /* wide so it wraps less on desktop */
-  padding: 1.25rem 1.75rem;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  color: #b7c3da;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(4px);
-}
-.update-message strong { color: #ffffff; }
-.update-message em     { color: #7fa6ff; font-style: italic; }
-
-/* Bottom mission card is hidden on desktop by default */
-.mission-bottom { display: none; }
-
-/* ===== Mobile layout ===== */
-@media (max-width: 768px) {
-  /* Hide the top mission on phones; show the bottom one near footer */
-  .update-message { display: none; }
-
-  .mission-bottom {
-    display: block;
-    margin: 1.5rem auto;
-    padding: 1rem 1.25rem;
-    max-width: 95%;
-    background: rgba(18, 22, 40, 0.9);
-    border-radius: 12px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: #e7ecff;
-    text-align: center;
-  }
-  .mission-bottom strong { color: #fff; }
-  .mission-bottom em     { color: #a7b7ff; }
-}
-/* === Unify brand blue to match desktop (header + primary buttons) === */
-
-#pick.btn,
-.btn.primary{
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  color:#fff;
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 28%, transparent);
-}
-.btn.primary:hover{
-  box-shadow: 0 12px 26px color-mix(in srgb, var(--brand) 35%, transparent);
-}
-
-/* Consolidated disabled state (covers aria-disabled + disabled) */
-.mode-toggle button[disabled],
-.mode-toggle [aria-disabled="true"],
-#modeVideo[aria-disabled="true"],
-#modeVideo.disabled{
-  position: relative;              /* ← add this */
-  opacity: .55;
-  cursor: not-allowed;
-  pointer-events: none;
-  filter: saturate(.85);
-  background: rgba(79,140,255,.10);
-  border: 1px solid rgba(79,140,255,.28);
-  color: color-mix(in srgb, var(--text) 70%, #9aa5c6);
-}
-
-/* If .selected sticks on the disabled button, keep it dim */
-.mode-toggle #modeVideo[aria-disabled="true"].selected {
-  background: rgba(79,140,255,.10) !important;
-  color: color-mix(in srgb, var(--text) 70%, #9aa5c6) !important;
-  border-color: rgba(79,140,255,.28) !important;
-  box-shadow: none !important;
-}
-
-/* Clean, centered COMING SOON pill above disabled Video button */
-#modeVideo[disabled]::after,
-#modeVideo[aria-disabled="true"]::after {
-  content: "COMING SOON";
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 6px);
-  transform: translateX(-50%);
-  padding: 3px 10px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: .03em;
-  white-space: nowrap;
-  color: #fff;
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
-  border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.35);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Make sure container allows pill to show */
-.mode-toggle {
-  position: relative;
-  overflow: visible;
-}
-
-/* Fine-tune for small screens */
-@media (max-width: 420px) {
-  #modeVideo[disabled]::after,
-  #modeVideo[aria-disabled="true"]::after {
-    bottom: calc(100% + 8px);
-  }
-}
-
-
-/* === Fix dropzone text contrast (light & dark) === */
+/* Contrast fixes for dropzone text in light mode */
 .dropzone .drop-inner p,
-.dropzone .drop-inner p strong{ color: var(--text); opacity: .98; }
-
+.dropzone .drop-inner p strong{ color: var(--text); opacity:.98; }
 @media (prefers-color-scheme: light){
-  /* On light cards the text must be dark, not faded */
   .dropzone{
     background: color-mix(in srgb, #ffffff 96%, var(--surface) 4%);
     border-color: color-mix(in srgb, var(--brand) 22%, transparent);
   }
   .dropzone .drop-inner p,
   .dropzone .drop-inner p strong{
-    color:#0d1224;  /* crisp dark text for iOS light mode */
-    opacity: 1;
+    color:#0d1224; opacity:1;
   }
 }
 
-/* Make sure chips’ text is never too faint on mobile */
-.mode-toggle button{ color: var(--text); white-space: nowrap; }
-/* Neutral style for secondary/ghost so they match each other */
-.btn.secondary,
-.btn.ghost{
-  background: color-mix(in srgb, var(--panel-strong) 85%, #000 0%);
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-.btn.secondary:hover,
-.btn.ghost:hover{
-  border-color: color-mix(in srgb, var(--brand) 35%, transparent);
-}
-
-/* Unified disabled look for any button (works for <button> and <a>) */
-.btn[disabled],
-.btn:disabled,
-.btn[aria-disabled="true"],
-.btn.disabled,
-.btn.is-disabled{
-  opacity: .55;
-  cursor: not-allowed;
-  pointer-events: none;
-  box-shadow: none;
-  filter: saturate(.85);
-  background: color-mix(in srgb, var(--panel-strong) 92%, #000 0%);
-  border-color: color-mix(in srgb, var(--border) 60%, transparent);
-  color: color-mix(in srgb, var(--text) 60%, #9aa5c6);
-}
-/* ===== OneZip (Bulk Mode) niceties ===== */
-#start, #progWrap, #result, #shareButtons {
-  scroll-margin-top: 80px;
-}
-
-.thumb-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.35rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.link {
-  text-decoration: underline;
-  opacity: 0.8;
-}
-
-.link:hover {
-  opacity: 1;
-}
+/* OneZip niceties */
+#start, #progWrap, #result, #shareButtons{ scroll-margin-top: 80px; }
+.thumb-row{ display:flex; justify-content:space-between; padding:.35rem 0; border-bottom:1px solid rgba(0,0,0,.06); }
+.link{ text-decoration:underline; opacity:.8; }
+.link:hover{ opacity:1; }

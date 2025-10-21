@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="home">
 <head>
   <!-- Meta + SEO -->
   <meta charset="utf-8" />
@@ -110,10 +110,11 @@
 
       <!-- OneZip / Bulk Mode link -->
       <div class="onezip-cta" style="text-align:center; margin-top:2rem;">
-        <a href="/bulk.html" class="link" style="font-size:1rem;">
-          Need to shrink multiple photos? <strong>Try OneZip →</strong>
-        </a>
-      </div>
+  <a href="/bulk.html" class="link try-onezip" style="font-size:1rem;">
+    Need to shrink multiple photos? <strong>Try OneZip →</strong>
+  </a>
+</div>
+
 
     </div> <!-- /.container -->
   </main>
@@ -149,5 +150,34 @@
   <script>console.log("index.min.js executed:", !!window.FFmpegUtil);</script>
 
   <script defer src="/app.js?v=11"></script>
+
+<!-- Live Header Height Slider (remove for production) -->
+<!--
+<div style="
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#111c;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:8px;
+  font-family:sans-serif;
+  z-index:9999;
+  backdrop-filter:blur(6px);
+  box-shadow:0 4px 10px rgba(0,0,0,.3);
+  font-size:14px;">
+  <label for="hdrRange" style="font-weight:600;">Header height</label><br>
+  <input id="hdrRange" type="range" min="0.5" max="5" step="0.1" value="2.5"
+         style="width:160px; accent-color:#4f8cff;"
+         oninput="document.documentElement.style.setProperty('--header-padding', this.value + 'rem')">
+  <span id="hdrVal" style="margin-left:8px;">2.5 rem</span>
+  <script>
+    const r = document.getElementById('hdrRange');
+    const v = document.getElementById('hdrVal');
+    r.addEventListener('input', () => v.textContent = r.value + ' rem');
+  </script>
+</div>
+-->
+
 </body>
 </html>

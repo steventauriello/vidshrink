@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="bulk">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,6 +8,7 @@
 </head>
 <body>
   <header class="site">
+    <a href="/" class="home-return" aria-label="Back to home">← Home</a>
     <div class="container">
       <h1 class="logo">VidShrink</h1>
       <p class="subtitle">
@@ -70,5 +71,76 @@
 
   <!-- your image compressor isn't FFmpeg-dependent; no heavy video libs needed here -->
   <script defer src="/bulk.js"></script>
+<!-- Bulk page live tuner (affects only this page at runtime) -->
+
+<!--
+<div class="tuner" style="
+  position: fixed; right: 18px; bottom: 18px; z-index: 50;
+  background: rgba(10,12,24,.92); color:#fff; border:1px solid rgba(255,255,255,.12);
+  border-radius: 12px; padding: 12px 14px; box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  width: 260px; font: 600 13px/1.3 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;">
+  <div style="margin-bottom:8px; opacity:.9;">Bulk header</div>
+
+  <label style="display:block;margin:.4rem 0 .2rem;">Height</label>
+  <input id="bulkPad" type="range" min="0.6" max="3.2" step="0.1"
+         style="width:100%;" />
+
+  <label style="display:block;margin:.6rem 0 .2rem;">Title size</label>
+  <input id="bulkFont" type="range" min="1.2" max="3.0" step="0.1"
+         style="width:100%;" />
+
+  <label style="display:block;margin:.6rem 0 .3rem;">Header color</label>
+  <input id="bulkColor" type="color" style="width:100%; height:34px; border-radius:8px; border:0;"/>
+
+  <label style="display:block;margin:.6rem 0 .3rem;">Brand</label>
+  <input id="bulkBrand" type="color" style="width:100%; height:34px; border-radius:8px; border:0;"/>
+
+  <label style="display:block;margin:.6rem 0 .3rem;">Brand accent</label>
+  <input id="bulkBrand2" type="color" style="width:100%; height:34px; border-radius:8px; border:0;"/>
+</div>
+
+<script>
+(function () {
+  // target the <html class="bulk"> element
+  const root = document.documentElement;
+
+  // set initial knobs from computed values so sliders reflect current CSS
+  function initRange(id, varName, isRem=false) {
+    const el = document.getElementById(id);
+    const val = getComputedStyle(root).getPropertyValue(varName).trim();
+    if (!el) return;
+    if (isRem) {
+      // convert px/rem to rem number for the slider
+      const num = val.endsWith('rem') ? parseFloat(val) :
+                  val.endsWith('px')  ? parseFloat(val)/parseFloat(getComputedStyle(document.documentElement).fontSize) :
+                  parseFloat(val);
+      if (!isNaN(num)) el.value = num;
+    } else {
+      el.value = val || el.value;
+    }
+  }
+  initRange('bulkPad',  '--header-padding', true);
+  initRange('bulkFont', '--header-font',    true);
+  initRange('bulkColor','--header-blue',    false);
+  initRange('bulkBrand','--brand',          false);
+  initRange('bulkBrand2','--brand-2',       false);
+
+  // wire inputs to CSS variables (runtime only on this page)
+  const pad   = document.getElementById('bulkPad');
+  const font  = document.getElementById('bulkFont');
+  const color = document.getElementById('bulkColor');
+  const brand = document.getElementById('bulkBrand');
+  const brand2= document.getElementById('bulkBrand2');
+
+  const set = (name, value) => root.style.setProperty(name, value);
+
+  pad.addEventListener('input',  e => set('--header-padding', e.target.value + 'rem'));
+  font.addEventListener('input', e => set('--header-font',    e.target.value + 'rem'));
+  color.addEventListener('input',e => set('--header-blue',    e.target.value));
+  brand.addEventListener('input',e => set('--brand',          e.target.value));
+  brand2.addEventListener('input',e => set('--brand-2',       e.target.value));
+})();
+</script>
+-->
 </body>
 </html>
